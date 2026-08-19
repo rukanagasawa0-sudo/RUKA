@@ -1,0 +1,14 @@
+node_modules/
+npm-debug.log*
+
+# uploaded card images can be scans/photos of copyrighted cards —
+# keep them local to each host, never commit them
+server/uploads/*
+!server/uploads/.gitkeep
+
+# personal card data (names/effects you typed in from your own cards)
+cards/*.json
+!cards/sample-cards.json
+
+.DS_Store
+*.log

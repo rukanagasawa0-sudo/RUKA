@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>RUKA カードゲームシミュレーター</title>
+<link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+
+<header class="topbar">
+  <h1>🎴 身内カードゲームシミュレーター</h1>
+  <div id="connBadge" class="badge offline">未接続</div>
+</header>
+
+<!-- ロビー画面 -->
+<section id="screen-lobby" class="screen">
+  <div class="card panel">
+    <h2>はじめる</h2>
+    <label>あなたの名前
+      <input id="nameInput" type="text" placeholder="例：しんいち" maxlength="20" />
+    </label>
+
+    <div class="row gap">
+      <button id="btnCreate" class="primary">ルームを作る</button>
+    </div>
+
+    <hr />
+
+    <label>ルームコードで参加
+      <input id="joinCode" type="text" placeholder="例：AB12CD" maxlength="6" style="text-transform:uppercase" />
+    </label>
+    <div class="row gap">
+      <button id="btnJoin">参加する</button>
+    </div>
+    <p id="lobbyError" class="error"></p>
+  </div>
+</section>
+
+<!-- セットアップ画面（カードデータ読込 & デッキ構築） -->
+<section id="screen-setup" class="screen hidden">
+  <div class="card panel">
+    <h2>ルーム <span id="roomCodeLabel" class="mono"></span></h2>
+    <p class="hint">このコードを相手に伝えてください。相手は「参加する」から入室できます。</p>
+    <div id="playersInSetup" class="row gap"></div>
+  </div>
+
+  <div class="card panel">
+    <h2>① カードデータを読み込む</h2>
+    <p class="hint">
+      著作権のあるカード画像・テキストは同梱していません。自分たちで用意したJSONファイルを読み込んでください。
+      とりあえず動作を試したい場合は「サンプルデータを読み込む」でOKです。
+    </p>
+    <div class="row gap">
+      <button id="btnLoadSample">サンプルデータを読み込む</button>
+      <label class="filebtn">
+        JSONファイルを選択
+        <input id="cardJsonFile" type="file" accept="application/json" hidden />
+      </label>
+    </div>
+    <p id="poolStatus" class="hint"></p>
+    <details>
+      <summary>JSONフォーマット</summary>
+      <pre class="mono small">{
+  "settings": { "mainDeckSize": 40, "openingHand": 5, "startingLife": 8 },
+  "cards": [
+    { "id": "chr-01", "type": "character", "name": "名前", "text": "効果テキスト", "image": "https://... または /uploads/... (任意)" }
+  ]
+}</pre>
+    </details>
+  </div>
+
+  <div class="card panel">
+    <h2>② カード画像を追加（任意）</h2>
+    <p class="hint">スキャン・撮影した画像をアップロードして、上のJSONの "image" にURLを貼り付けてください。</p>
+    <input id="imageUpload" type="file" accept="image/*" />
+    <p id="uploadResult" class="hint mono small"></p>
+  </div>
+
+  <div class="card panel">
+    <h2>③ デッキを組む</h2>
+    <div id="deckBuilder"></div>
+    <div class="row gap">
+      <button id="btnSubmitDeck" class="primary">デッキ確定</button>
+    </div>
+    <p id="deckError" class="error"></p>
+  </div>
+
+  <div class="card panel">
+    <h2>④ 対戦開始</h2>
+    <p class="hint">両者のデッキ確定後に開始できます。</p>
+    <button id="btnStart" class="primary">対戦開始</button>
+    <p id="startError" class="error"></p>
+  </div>
+</section>
+
+<!-- 対戦盤面 -->
+<section id="screen-board" class="screen hidden">
+  <div class="board">
+    <div class="opp-area">
+      <div class="player-strip">
+        <div class="pname" id="oppName">相手</div>
+        <div class="counters" id="oppCounters"></div>
+      </div>
+      <div class="zonebar">
+        <div class="zone deckzone" id="oppDeck"><div class="zonelabel">山札</div><div class="cardback"></div><div class="count" id="oppDeckCount">0</div></div>
+        <div class="zone" id="oppPartner"><div class="zonelabel">パートナー</div><div class="slot"></div></div>
+        <div class="zone" id="oppCase"><div class="zonelabel">事件</div><div class="slot"></div></div>
+        <div class="zone handzone" id="oppHand"><div class="zonelabel">手札</div><div class="cardback"></div><div class="count" id="oppHandCount">0</div></div>
+        <div class="zone trashzone" id="oppTrash"><div class="zonelabel">トラッシュ</div><div class="cards"></div></div>
+      </div>
+      <div class="fieldzone" id="oppField"><div class="zonelabel">フィールド</div><div class="cards"></div></div>
+    </div>
+
+    <div class="midbar">
+      <div class="turninfo">
+        <span id="turnLabel">-</span>
+        <span id="phaseLabel" class="pill">-</span>
+      </div>
+      <div class="row gap">
+        <button id="btnNextPhase">次のフェイズ</button>
+        <button id="btnEndTurn" class="primary">ターン終了</button>
+      </div>
+    </div>
+
+    <div class="self-area">
+      <div class="fieldzone" id="selfField"><div class="zonelabel">フィールド</div><div class="cards"></div></div>
+      <div class="zonebar">
+        <div class="zone deckzone" id="selfDeck">
+          <div class="zonelabel">山札</div><div class="cardback"></div><div class="count" id="selfDeckCount">0</div>
+          <div class="row gap tiny">
+            <button data-draw="1">1枚</button>
+            <button id="btnShuffle">🔀</button>
+          </div>
+        </div>
+        <div class="zone" id="selfPartner"><div class="zonelabel">パートナー</div><div class="slot"></div></div>
+        <div class="zone" id="selfCase"><div class="zonelabel">事件</div><div class="slot"></div></div>
+        <div class="zone trashzone" id="selfTrash"><div class="zonelabel">トラッシュ</div><div class="cards"></div></div>
+      </div>
+      <div class="handzone-self" id="selfHand"><div class="zonelabel">手札</div><div class="cards"></div></div>
+      <div class="player-strip">
+        <div class="pname" id="selfName">自分</div>
+        <div class="counters" id="selfCounters"></div>
+      </div>
+    </div>
+  </div>
+
+  <aside class="sidebar">
+    <h3>ログ</h3>
+    <div id="log" class="log"></div>
+    <form id="chatForm" class="row gap">
+      <input id="chatInput" type="text" placeholder="ひとことチャット" maxlength="200" />
+      <button type="submit">送信</button>
+    </form>
+  </aside>
+</section>
+
+<!-- カード操作メニュー -->
+<div id="cardMenu" class="cardmenu hidden"></div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script src="/app.js"></script>
+</body>
+</html>

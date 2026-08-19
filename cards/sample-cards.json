@@ -1,0 +1,25 @@
+{
+  "settings": {
+    "mainDeckSize": 40,
+    "openingHand": 5,
+    "startingLife": 8
+  },
+  "cards": [
+    { "id": "chr-01", "type": "character", "name": "サンプルキャラA", "text": "サンプル効果テキスト。自分のカードデータに差し替えてください。" },
+    { "id": "chr-02", "type": "character", "name": "サンプルキャラB", "text": "" },
+    { "id": "chr-03", "type": "character", "name": "サンプルキャラC", "text": "" },
+    { "id": "chr-04", "type": "character", "name": "サンプルキャラD", "text": "" },
+    { "id": "chr-05", "type": "character", "name": "サンプルキャラE", "text": "" },
+    { "id": "chr-06", "type": "character", "name": "サンプルキャラF", "text": "" },
+    { "id": "chr-07", "type": "character", "name": "サンプルキャラG", "text": "" },
+    { "id": "chr-08", "type": "character", "name": "サンプルキャラH", "text": "" },
+    { "id": "evt-01", "type": "event", "name": "サンプルイベントA", "text": "" },
+    { "id": "evt-02", "type": "event", "name": "サンプルイベントB", "text": "" },
+    { "id": "evt-03", "type": "event", "name": "サンプルイベントC", "text": "" },
+    { "id": "evt-04", "type": "event", "name": "サンプルイベントD", "text": "" },
+    { "id": "partner-01", "type": "partner", "name": "サンプルパートナー1", "text": "パートナーカード枠に置くカードの例です。" },
+    { "id": "partner-02", "type": "partner", "name": "サンプルパートナー2", "text": "" },
+    { "id": "case-01", "type": "case", "name": "サンプル事件1", "text": "事件カード枠に置くカードの例です。" },
+    { "id": "case-02", "type": "case", "name": "サンプル事件2", "text": "" }
+  ]
+}
