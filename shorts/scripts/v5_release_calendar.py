@@ -3,46 +3,64 @@
 出典：ONE PIECE.com 公式ニュース(2026/11/6 特別番組)、ST-37/38 は公式商品ページで確認済み。
 """
 from config import CTA_RESERVE, SHOP_NAME
-from engine.render import W, card_sprite, ease_back, ease_out, img_sprite, lerp
+from engine.render import W, card_sprite, ease_back, ease_out, img_sprite, lerp, text_sprite
 from engine.render import Short
 from engine.widgets import box_sprite, burst, cta_panel, fade, pop_in, stamp
 
 EVENTS = [  # 日付, 名前, 補足, 色, 公式画像
-    ("11/21", "神の支配", "OP-18／ウォーターセブン", (40, 40, 60), ["box_op18"]),
-    ("12/19", "スタートデッキ2種", "ST-37・ST-38", (200, 60, 60), ["box_st37", "box_st38"]),
-    ("1/30", "EAST BLUE", "EB-06", (40, 110, 200), ["box_eb06"]),
-    ("2/27", "応答せよ、世界", "OP-19／エッグヘッド", (60, 150, 140), ["box_op19"]),
-    ("4/24", "夢の一枚", "PEB-01／全カードキラ", (210, 160, 40), []),
+    ("11/21", "神の支配", "ブースター OP-18／ウォーターセブン編", (40, 40, 60), ["box_op18"]),
+    ("12/19", "スタートデッキ2種", "ST-37 砂漠の王女と海賊たち／ST-38 バロックワークス", (200, 60, 60),
+     ["box_st37", "box_st38"]),
+    ("1/30", "EAST BLUE", "エクストラブースター EB-06", (40, 110, 200), ["box_eb06"]),
+    ("2/27", "応答せよ、世界", "ブースター OP-19／エッグヘッド編", (60, 150, 140), ["box_op19"]),
+    ("4/24", "夢の一枚", "PEB-01／1パック440円・全カードキラ", (210, 160, 40), []),
 ]
 
 
-def product(c, imgs, x, y, h, t, k=1.0):
+def product(c, imgs, x, y, h, t, k=1.0, label=True):
     if not imgs:  # 画像未公開
-        c.paste(card_sprite(int(h * 0.55), h, (210, 160, 40), "", "", "", back=True), x, y, scale=k)
-        c.text("画像\n未公開", x, y, 44, scale=k, fnt="dela", fill=(255, 255, 255), stroke=6)
+        c.paste(card_sprite(int(h * 0.62), h, (210, 160, 40), "", "", "", back=True), x, y, scale=k)
+        if label:
+            c.text("画像\n未公開", x, y, 60, scale=k, fnt="dela", fill=(255, 255, 255), stroke=7)
         return
+    n = len(imgs)
     for j, name in enumerate(imgs):
-        dx = (j - (len(imgs) - 1) / 2) * 90
-        c.paste(img_sprite(name, h, shine=(t * 0.5 + j * 0.3) % 1.5), x + dx, y + j * 30, scale=k,
-                rot=(j - (len(imgs) - 1) / 2) * -8)
+        dx = (j - (n - 1) / 2) * 300
+        c.paste(img_sprite(name, h, shine=(t * 0.5 + j * 0.3) % 1.5), x + dx, y, scale=k)
+
+
+def chips(c, upto, t):
+    """上部：5つの発売日。済み＝薄く、今＝色付き、これから＝枠だけ。"""
+    w, gap = 184, 10
+    x0 = (W - (w * 5 + gap * 4)) / 2
+    for i, (date, _, _, col, _) in enumerate(EVENTS):
+        x = x0 + i * (w + gap)
+        box = (x, 372, x + w, 444)
+        if i < upto:
+            c.rrect(box, 36, fill=(255, 255, 255, 150))
+            c.text(date, x + w / 2, 407, 40, fnt="dela", fill=(90, 90, 100))
+        elif i == upto:
+            k = ease_back(t / 0.3)
+            c.rrect(box, 36, fill=col + (255,), outline=(255, 255, 255), width=4)
+            c.text(date, x + w / 2, 407, 42, fnt="dela", fill=(255, 255, 255), scale=k)
+        else:
+            c.rrect(box, 36, outline=(255, 255, 255, 170), width=4)
+            c.text(date, x + w / 2, 407, 40, fnt="dela", fill=(255, 255, 255), alpha=0.75)
 
 
 def timeline(c, f, upto):
     t = f["t"]
-    c.d.rectangle((150, 400, 162, 400 + 142 * len(EVENTS)), fill=(255, 255, 255, 120))
-    for i, (date, name, sub, col, imgs) in enumerate(EVENTS[: upto + 1]):
-        y = 465 + i * 142
-        cur = i == upto
-        k = ease_back(((t if cur else 9) - 0.0) / 0.35)
-        c.d.ellipse((136, y - 20, 176, y + 20), fill=col + (255,), outline=(255, 255, 255), width=5)
-        x = lerp(1100, 0, k)
-        c.panel((200 + x, y - 65, 760 + x, y + 65), 34, fill=(255, 255, 255, 245 if cur else 200),
-                outline=col + (255,) if cur else None, width=6 if cur else 0)
-        c.text(date, 290 + x, y, 46, fnt="dela", fill=col)
-        c.text(name, 380 + x, y - 22, 40, anchor="lm", fnt="noto", fill=(30, 30, 30), align="left")
-        c.text(sub, 380 + x, y + 28, 28, anchor="lm", fnt="noto", fill=(110, 110, 120), align="left")
-    imgs = EVENTS[upto][4]
-    product(c, imgs, 905, 760, 420, t, ease_back(t / 0.4))
+    date, name, sub, col, imgs = EVENTS[upto]
+    chips(c, upto, t)
+    k = ease_back((t - 0.05) / 0.4)
+    product(c, imgs, W / 2, 735, 520, t, k, label=not (upto == 4 and f["li"] >= 1))
+    c.panel((80, 1020, 1000, 1172), 40, fill=(255, 255, 255, 245), outline=col + (255,), width=6)
+    c.text(f"*{date}* {name}", W / 2, 1068, 62, fnt="dela", fill=(30, 30, 30), hl=col, max_w=880,
+           alpha=min(1.0, max(0.0, t / 0.25)))
+    size = 38
+    while size > 24 and text_sprite(sub, size, "noto").width > 880:
+        size -= 2
+    c.text(sub, W / 2, 1135, size, fnt="noto", fill=(90, 90, 100), alpha=min(1.0, max(0.0, t / 0.25)))
 
 
 def intro(c, f):
@@ -60,12 +78,12 @@ def step(i):
         timeline(c, f, i)
         if i == 4 and f["li"] >= 1:
             lt = f["t"] - (f["scene"].lines[1].start - f["scene"].start)
-            stamp(c, "1パック8枚 全部キラ！", W / 2, 1148, lt, 0.0, color=(210, 160, 40), size=58, rot=-2)
+            stamp(c, "1パック8枚\n全部キラ！", W / 2, 735, lt, 0.0, color=(210, 160, 40), size=76, rot=-6)
     return draw
 
 
 def outro(c, f):
-    cta_panel(c, f["t"], SHOP_NAME, "予約は\n*お早めに*！", CTA_RESERVE, accent=(255, 120, 140))
+    cta_panel(c, f["t"], SHOP_NAME, "発売日を\n*チェック*！", CTA_RESERVE, accent=(255, 120, 140))
     c.text("※2026/11/13時点の発表内容。発売日・内容は変更の可能性があります。", W / 2, 1178, 24, fnt="noto",
            fill=(255, 255, 255), stroke=3, max_w=1000)
 
