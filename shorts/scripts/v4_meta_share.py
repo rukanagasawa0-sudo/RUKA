@@ -5,13 +5,14 @@
 import math
 
 from config import SHOP_NAME
-from engine.render import W, ease_back, ease_out, lerp
+from engine.render import W, ease_back, ease_out, img_sprite, lerp
 from engine.render import Short
+from engine.render import clamp
 from engine.widgets import COLOR, burst, cta_panel, fade, pop_in, shake, stamp
 
-SHARE = [("青ロックス", 25.0, COLOR["青"]), ("黄エネル", 8.7, COLOR["黄"]),
-         ("赤緑ルフィ&エース", 8.2, (200, 90, 60)), ("緑シャンクス", 8.2, COLOR["緑"]),
-         ("紫カイドウ", 7.7, COLOR["紫"]), ("その他", 42.2, (150, 150, 165))]
+SHARE = [("青ロックス", 25.0, COLOR["青"], "OP17-039"), ("黄エネル", 8.7, COLOR["黄"], "OP05-098"),
+         ("赤緑ルフィ&エース", 8.2, (200, 90, 60), "ST30-001"), ("緑シャンクス", 8.2, COLOR["緑"], "OP17-020"),
+         ("紫カイドウ", 7.7, COLOR["紫"], "OP17-058"), ("その他", 42.2, (150, 150, 165), None)]
 
 
 def people(c, t, n_hl, y=760):
@@ -20,7 +21,10 @@ def people(c, t, n_hl, y=760):
         k = ease_back((t - i * 0.12) / 0.3)
         x = 210 + i * 220
         hl = i < n_hl
-        col = COLOR["青"] if hl else (200, 200, 210)
+        if hl:
+            c.paste(img_sprite("cards/OP17-039", 360, shine=(t * 0.5) % 1.5, glow=(120, 200, 255)), x, y - 40)
+            continue
+        col = (200, 200, 210)
         r = 70 * k
         c.d.ellipse((x - r * 0.6, y - 150 - r * 0.6, x + r * 0.6, y - 150 + r * 0.6), fill=col + (255,))
         c.d.rounded_rectangle((x - r, y - 60, x + r, y - 60 + r * 2.2), int(r * 0.6) + 1, fill=col + (255,))
@@ -36,11 +40,11 @@ def intro(c, f):
 
 def donut(c, f):
     t = f["t"]
-    cx, cy, R = W / 2, 760, 330
+    cx, cy, R = 400, 760, 300
     p = ease_out((t - 0.1) / 1.6)
     total = 360 * p
     a0 = -90
-    for name, v, col in SHARE:
+    for name, v, col, _ in SHARE:
         sweep = 360 * v / 100
         if a0 + 90 >= total:
             break
@@ -56,33 +60,35 @@ def donut(c, f):
     c.text("デッキ集計", cx, cy + 55, 40, fnt="noto", fill=(255, 255, 255))
     if f["li"] >= 1:
         k = pop_in(f["t"] - (f["scene"].lines[1].start - f["scene"].start))
-        c.text("青ロックス\n*25.0%*", 830, 470, 56, scale=k, fnt="dela", fill=(255, 255, 255), stroke=6,
+        c.paste(img_sprite("cards/OP17-039", 380, glow=(120, 200, 255)), 860, 700, scale=k)
+        c.text("青ロックス\n*25.0%*", 860, 990, 50, scale=k, fnt="dela", fill=(255, 255, 255), stroke=6,
                hl=(120, 200, 255))
 
 
 def ranking(c, f):
     t = f["t"]
     c.text("シェア TOP5", W / 2, 410, 80, fnt="dela", fill=(255, 255, 255), stroke=8)
-    for i, (name, v, col) in enumerate(SHARE[:5]):
-        y = 540 + i * 135
+    for i, (name, v, col, cid) in enumerate(SHARE[:5]):
+        y = 530 + i * 140
         k = ease_out((t - 0.1 - i * 0.12) / 0.6)
-        c.text(name, 80, y, 46, anchor="lm", fnt="noto", fill=(255, 255, 255), stroke=5, align="left")
-        bw = 640 * v / 25.0 * k
-        c.rrect((80, y + 32, 80 + max(30, bw), y + 82), 25, fill=col + (255,))
-        c.text(f"{v * k:.1f}%", 100 + max(30, bw), y + 57, 44, anchor="lm", fnt="dela", fill=(255, 255, 255),
+        c.paste(img_sprite("cards/" + cid, 125), 110, y + 30, scale=clamp(k * 1.5))
+        c.text(name, 200, y, 46, anchor="lm", fnt="noto", fill=(255, 255, 255), stroke=5, align="left")
+        bw = 560 * v / 25.0 * k
+        c.rrect((200, y + 32, 200 + max(30, bw), y + 82), 25, fill=col + (255,))
+        c.text(f"{v * k:.1f}%", 220 + max(30, bw), y + 57, 44, anchor="lm", fnt="dela", fill=(255, 255, 255),
                stroke=5, align="left")
 
 
 def ban(c, f):
     t = f["t"]
     dx, dy = shake(t, 14, 0.4, 0.2)
-    c.panel((120, 440, 960, 1000), 40, fill=(255, 255, 255, 235))
-    c.text("10/12 禁止改訂", W / 2, 530, 64, fnt="dela", fill=(30, 30, 30))
-    c.text("ジュラキュール・ミホーク\n（OP14-020）", W / 2, 700, 56, fnt="noto", fill=(30, 30, 30))
-    stamp(c, "禁止", W / 2 + dx, 870 + dy, t, 0.2, size=140, rot=-10)
+    c.text("10/12 禁止改訂", W / 2, 420, 72, fnt="dela", fill=(255, 255, 255), stroke=8)
+    c.paste(img_sprite("cards/OP14-020", 560, dim=0.35 if t > 0.2 else 0), W / 2, 760)
+    c.text("ジュラキュール・ミホーク（OP14-020）", W / 2, 1065, 40, fnt="noto", fill=(255, 255, 255), stroke=5)
+    stamp(c, "禁止", W / 2 + dx, 760 + dy, t, 0.2, size=170, rot=-12)
     if f["li"] >= 1:
         lt = f["t"] - (f["scene"].lines[1].start - f["scene"].start)
-        c.text("→ *青ロックス*一強に", W / 2, 1120, 64, fnt="dela", fill=(255, 255, 255), stroke=7,
+        c.text("→ *青ロックス*一強に", W / 2, 1160, 60, fnt="dela", fill=(255, 255, 255), stroke=7,
                alpha=fade(lt), hl=(120, 200, 255))
 
 

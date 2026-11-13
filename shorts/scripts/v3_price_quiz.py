@@ -3,33 +3,42 @@
 出典：ワンピースカード当たり・買取価格まとめ（onepiece-card-atari.jp）買取ランキング 2026/11/13。
 """
 from config import SHOP_NAME
-from engine.render import Line, W, card_sprite, clamp, ease_back, lerp
+from engine.render import Line, W, card_sprite, clamp, ease_back, img_sprite, lerp
 from engine.render import Short
 from engine.widgets import burst, count, cta_panel, fade, pop_in, shake, stamp, yen
 
-CHOICES = [  # ラベル, 弾, 色
-    ("A", "ルフィ SP", "受け継がれる意志", (200, 50, 50)),
-    ("B", "ロジャー GSP", "新たなる皇帝", (60, 60, 70)),
-    ("C", "ルフィ SP", "新時代の主役", (210, 140, 30)),
+CHOICES = [  # ラベル, 名前, 弾, 色, 公式画像
+    ("A", "ルフィ SP", "受け継がれる意志", (200, 50, 50), "OP13-118_p3"),
+    ("B", "ロジャー GSP", "新たなる皇帝", (60, 60, 70), "OP09-118_p2"),
+    ("C", "ルフィ SP", "新時代の主役", (210, 140, 30), "OP05-119_p2"),
 ]
 ANSWER = 0
 
 
 def choices(c, t, reveal=-1.0, picks=()):
-    for i, (lab, nm, sub, col) in enumerate(CHOICES):
+    for i, (lab, nm, sub, col, cid) in enumerate(CHOICES):
         k = ease_back((t - 0.1 - i * 0.15) / 0.35)
         x = 190 + i * 350
-        y = 760
+        y = 730
+        win = reveal >= 0 and i == ANSWER
         dim = reveal >= 0 and i != ANSWER
-        sc = k * (1 + (0.12 * ease_back(reveal / 0.4) if reveal >= 0 and i == ANSWER else 0))
-        art = ("1位" if i == ANSWER else "×") if reveal >= 0 else "？"
-        spr = card_sprite(280, 400, tuple(int(v * 0.35) for v in col) if dim else col, nm, sub, lab,
-                          shine=(t * 0.5 + i * 0.3) % 1.6, art=art)
-        c.paste(spr, x, y, scale=sc, alpha=0.45 if dim else 1)
+        sc = k * (1 + (0.1 * ease_back(reveal / 0.4) if win else 0))
+        spr = img_sprite("cards/" + cid, 400, shine=(t * 0.5 + i * 0.3) % 1.6, dim=0.6 if dim else 0,
+                         glow=(255, 220, 60) if win else None)
+        c.paste(spr, x, y, scale=sc)
+        # A/B/C バッジ
+        c.d.ellipse((x - 150, y - 230, x - 70, y - 150), fill=col + (255,), outline=(255, 255, 255), width=5)
+        c.text(lab, x - 110, y - 192, 50, fnt="dela", fill=(255, 255, 255), alpha=clamp(k))
+        c.text(nm, x, y + 235, 36, fnt="noto", fill=(255, 255, 255), stroke=5, alpha=clamp(k))
+        c.text(sub, x, y + 278, 28, fnt="noto", fill=(255, 255, 255), stroke=4, alpha=clamp(k))
+        if win:
+            stamp(c, "1位", x, y - 40, reveal, 0.2, size=120, rot=-12)
+        if dim:
+            c.text("×", x, y - 30, 200, fnt="dela", fill=(225, 30, 50), stroke=10, alpha=clamp(reveal / 0.3))
         for who, pick, colr in picks:
             if pick == i:
-                c.rrect((x - 110, y + 230, x + 110, y + 290), 30, fill=colr + (255,))
-                c.text(who, x, y + 260, 36, fnt="round", fill=(255, 255, 255))
+                c.rrect((x - 100, y + 312, x + 100, y + 368), 28, fill=colr + (255,))
+                c.text(who, x, y + 340, 34, fnt="round", fill=(255, 255, 255))
 
 
 def q_scene(c, f):
@@ -53,8 +62,9 @@ def countdown(c, f):
     n = 3 - int(tt / 0.8) if tt >= 0 else 0
     if 1 <= n <= 3:
         k = ease_back((tt % 0.8) / 0.3)
-        c.d.ellipse((W / 2 - 110, 1110 - 110, W / 2 + 110, 1110 + 110), fill=(225, 30, 50, 230))
-        c.text(str(n), W / 2, 1105, 160, scale=k, fnt="dela", fill=(255, 255, 255), stroke=8)
+        c.d.ellipse((W / 2 - 80, 1160 - 80, W / 2 + 80, 1160 + 80), fill=(225, 30, 50, 235),
+                    outline=(255, 255, 255), width=6)
+        c.text(str(n), W / 2, 1155, 120, scale=k, fnt="dela", fill=(255, 255, 255), stroke=8)
 
 
 def reveal(c, f):
@@ -66,27 +76,30 @@ def reveal(c, f):
     if f["li"] >= 1:
         lt = t - (f["scene"].lines[1].start - f["scene"].start)
         dx, dy = shake(lt, 12, 0.4, 1.4)
-        c.panel((80, 1075, 1000, 1215), 40, fill=(20, 20, 30, 230), shadow=False)
-        c.text("推定買取 " + yen(count(lt, 2085000, 0.0, 1.4)), W / 2 + dx, 1145 + dy, 76, fnt="dela",
+        c.panel((80, 1100, 1000, 1225), 40, fill=(20, 20, 30, 235), shadow=False)
+        c.text("推定買取 " + yen(count(lt, 2085000, 0.0, 1.4)), W / 2 + dx, 1162 + dy, 72, fnt="dela",
                fill=(255, 220, 60), stroke=6)
 
 
 def top3(c, f):
     t = f["t"]
     c.text("買取ランキング TOP3", W / 2, 420, 78, fnt="dela", fill=(255, 255, 255), stroke=8)
-    rows = [("1位", "ルフィ SP（受け継がれる意志）", 2085000), ("2位", "ルフィ SP（世界最強の戦士）", 1485000),
-            ("3位", "ルフィ 金SP（神速の拳）", 1035000)]
-    for i, (r, nm, v) in enumerate(rows):
+    rows = [("1位", "ルフィ SP", "受け継がれる意志", 2085000, "OP13-118_p3"),
+            ("2位", "ルフィ SP", "世界最強の戦士", 1485000, "EB04-061_p3"),
+            ("3位", "ルフィ 金SP", "神速の拳", 1035000, "OP05-119_p7")]
+    for i, (r, nm, sub, v, cid) in enumerate(rows):
         k = ease_back((t - 0.1 - i * 0.25) / 0.35)
-        y = 570 + i * 190
-        x = lerp(-600, 0, k)
-        c.panel((60 + x, y - 80, 1020 + x, y + 80), 40, fill=(255, 255, 255, 240))
-        c.text(r, 140 + x, y, 56, fnt="dela", fill=(225, 30, 50))
-        c.text(nm, 230 + x, y - 28, 40, anchor="lm", fnt="noto", fill=(40, 40, 40), align="left")
-        c.text(yen(v), 990 + x, y + 30, 54, anchor="rm", fnt="dela", fill=(30, 30, 30))
+        y = 590 + i * 205
+        x = lerp(-700, 0, k)
+        c.panel((60 + x, y - 90, 1020 + x, y + 90), 40, fill=(255, 255, 255, 240))
+        c.text(r, 130 + x, y, 54, fnt="dela", fill=(225, 30, 50))
+        c.paste(img_sprite("cards/" + cid, 200), 270 + x, y)
+        c.text(nm, 390 + x, y - 45, 44, anchor="lm", fnt="noto", fill=(40, 40, 40), align="left")
+        c.text(sub, 390 + x, y + 2, 32, anchor="lm", fnt="noto", fill=(110, 110, 120), align="left")
+        c.text(yen(v), 990 + x, y + 50, 54, anchor="rm", fnt="dela", fill=(30, 30, 30))
     if f["li"] >= 1:
         lt = t - (f["scene"].lines[1].start - f["scene"].start)
-        stamp(c, "全部ルフィ！！", W / 2, 1140, lt, 0, size=100, rot=-6)
+        stamp(c, "全部ルフィ！！", W / 2, 1180, lt, 0, size=90, rot=-6)
 
 
 def outro(c, f):

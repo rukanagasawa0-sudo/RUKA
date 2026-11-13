@@ -3,9 +3,12 @@
 出典：トレカの地図「ワンピースカード未開封ボックス買取相場」2026/11/13 時点。
 """
 from config import CTA_RESERVE, SHOP_NAME
-from engine.render import W, Line, Short, ease_back, ease_out, lerp
+from engine.render import W, Line, Short, ease_back, ease_out, img_sprite, lerp
 from engine.widgets import (box_sprite, burst, count, cta_panel, fade, pop_in, shake, stamp,
                             yen)
+
+PACK = {"PRB-01": "box_prb01_01", "OP-11": "box_op11_01", "EB-02": "box_eb02_01",
+        "OP-01": "box_op01_01", "OP-05": "box_op05_01"}
 
 DATA = [  # 順位, 名前, 読み, 型番, 定価, 買取, 色
     (5, "ONE PIECE CARD\nTHE BEST", "ワンピースカード・ザ・ベスト", "PRB-01", 5500, 15800, (60, 60, 70)),
@@ -20,7 +23,9 @@ def intro(c, f):
     t = f["t"]
     burst(c, W / 2, 760, 900, t, (255, 220, 60), alpha=60)
     k = pop_in(t, 0.1)
-    c.paste(box_sprite(420, 420, (170, 30, 60), "？？？", "定価 5,280円"), W / 2, 700, scale=k)
+    c.paste(img_sprite("box_op05_01", 560, dim=0.85), W / 2, 720, scale=k)
+    c.text("？", W / 2, 700, 260, scale=k, fnt="dela", fill=(255, 255, 255), stroke=12)
+    c.text("定価 5,280円", W / 2, 1000, 56, alpha=fade(t, 0.3), fnt="dela", fill=(255, 255, 255), stroke=7)
     if f["li"] >= 2:
         dx, dy = shake(f["lt"], 14, 0.4)
         stamp(c, "定価の6倍超え!?", W / 2 + dx, 1080 + dy, f["lt"], 0.0, size=100)
@@ -39,7 +44,10 @@ def rank_scene(rank, name, code, price, buy, color):
                stroke=10, stroke_fill=(0, 0, 0))
         # BOX
         bk = ease_back((t - 0.15) / 0.4)
-        c.paste(box_sprite(380, 380, color, name, code), lerp(-300, 300, bk), 740, rot=4 * (1 - bk))
+        c.paste(img_sprite(PACK[code], 500, shine=(t * 0.45) % 1.5,
+                           glow=(255, 220, 80) if rank == 1 else None), lerp(-300, 290, bk), 760,
+                rot=6 * (1 - bk))
+        c.text(code, 290, 990, 34, alpha=fade(t, 0.4), fnt="dela", fill=(255, 255, 255), stroke=5)
         # 定価 → 買取
         a = fade(t, 0.5)
         c.text("定価", 820, 560, 44, fnt="noto", fill=(255, 255, 255), stroke=4, alpha=a)
@@ -63,7 +71,7 @@ def outro(c, f):
     t = f["t"]
     if f["li"] < 2:
         k = pop_in(t, 0.0)
-        c.paste(box_sprite(400, 400, (40, 40, 60), "神の支配", "OP-18  11/21発売"), W / 2, 700, scale=k)
+        c.paste(img_sprite("box_op18b", 560, shine=(t * 0.4) % 1.5), W / 2, 700, scale=k)
         stamp(c, "1BOX 5,760円", W / 2, 1080, t, 0.6, color=(255, 200, 40), size=90, rot=-4)
     else:
         cta_panel(c, f["lt"] if f["li"] == 2 else 9, SHOP_NAME, "第18弾 神の支配", CTA_RESERVE)

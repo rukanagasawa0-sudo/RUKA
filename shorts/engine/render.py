@@ -197,6 +197,62 @@ class Ctx:
         self.d.rounded_rectangle(box, r, fill=fill, outline=outline, width=width)
 
 
+ASSETS = os.path.join(ROOT, "assets", "official")
+COPYRIGHT = "画像：公式サイトより ©尾田栄一郎／集英社・フジテレビ・東映アニメーション"
+
+
+def img_sprite(name, h, shine=0.0, dim=0.0, radius=None, glow=None):
+    """公式画像（カード: 'cards/OP13-118_p3'、パック: 'box_op05_01'）を高さ h で返す。"""
+    key = ("img", name, h, round(shine, 2), dim, radius, glow)
+    if key in _sprite_cache:
+        return _sprite_cache[key]
+    path = None
+    for ext in (".png", ".webp", ".jpg"):
+        if os.path.exists(os.path.join(ASSETS, name + ext)):
+            path = os.path.join(ASSETS, name + ext)
+            break
+    src = Image.open(path).convert("RGBA")
+    bbox = src.getchannel("A").getbbox()
+    if bbox:
+        src = src.crop(bbox)
+    w = max(1, int(src.width * h / src.height))
+    im = src.resize((w, h), Image.LANCZOS)
+    is_card = name.startswith("cards/")
+    if is_card:  # 角丸
+        r = radius if radius is not None else int(w * 0.045)
+        mask = Image.new("L", im.size, 0)
+        ImageDraw.Draw(mask).rounded_rectangle((0, 0, w - 1, h - 1), r, fill=255)
+        im.putalpha(mask)
+    if dim:
+        dark = Image.new("RGBA", im.size, (0, 0, 0, int(255 * dim)))
+        dark.putalpha(Image.eval(im.getchannel("A"), lambda v: int(v * dim)))
+        im.alpha_composite(dark)
+    if shine > 0:
+        ov = Image.new("RGBA", im.size, (0, 0, 0, 0))
+        od = ImageDraw.Draw(ov)
+        sx = -w + shine * (w * 3)
+        od.polygon([(sx, 0), (sx + w * 0.25, 0), (sx + w * 0.25 - h * 0.6, h), (sx - h * 0.6, h)],
+                   fill=(255, 255, 255, 90))
+        ov.putalpha(Image.composite(ov.getchannel("A"), Image.new("L", im.size, 0), im.getchannel("A")))
+        im.alpha_composite(ov)
+    pad = 24
+    out = Image.new("RGBA", (w + pad * 2, h + pad * 2), (0, 0, 0, 0))
+    sh = Image.new("RGBA", out.size, (0, 0, 0, 0))
+    a = im.getchannel("A").point(lambda v: int(v * 0.55))
+    sh.paste((0, 0, 0, 255), (pad + 8, pad + 12), a)
+    sh = sh.filter(ImageFilter.GaussianBlur(9))
+    out.alpha_composite(sh)
+    if glow:
+        g = Image.new("RGBA", out.size, (0, 0, 0, 0))
+        g.paste(glow + (255,), (pad, pad), im.getchannel("A"))
+        g = g.filter(ImageFilter.GaussianBlur(14))
+        out.alpha_composite(g)
+        out.alpha_composite(g)
+    out.alpha_composite(im, (pad, pad))
+    _sprite_cache[key] = out
+    return out
+
+
 def card_sprite(w, h, color, label="", sub="", rarity="", shine=0.0, back=False, art=""):
     """著作物を使わない「カード風」オリジナル図形。"""
     key = ("card", w, h, color, label, sub, rarity, round(shine, 2), back, art)
@@ -289,6 +345,7 @@ class Short:
     bgm_gain: float = 0.55
     scenes: list = field(default_factory=list)
     accent: tuple = (255, 220, 0)
+    uses_official: bool = True
 
     def scene(self, draw, *lines, **kw):
         ls = [l if isinstance(l, Line) else Line(*l) for l in lines]
@@ -446,6 +503,9 @@ class Short:
             self._credit = "VOICEVOX:" + "／".join(names)
         c.text(self._credit, 50, 1580, 28, anchor="lm", fnt="noto", fill=(255, 255, 255),
                stroke=3, align="left")
+        if getattr(self, "uses_official", False):
+            c.text(COPYRIGHT, 50, 1622, 24, anchor="lm", fnt="noto", fill=(255, 255, 255),
+                   stroke=3, align="left")
 
     # ---------------------------------------------------------- output
     def render(self, out_dir, preview_times=()):

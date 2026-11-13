@@ -1,44 +1,56 @@
 """これから半年の発売カレンダー（タイムライン形式・波音リツ＋冥鳴ひまり）。
 
-出典：ONE PIECE.com 公式ニュース(2026/11/6 特別番組)、ST-37/38 は販売店情報(要公式確認)。
+出典：ONE PIECE.com 公式ニュース(2026/11/6 特別番組)、ST-37/38 は公式商品ページで確認済み。
 """
 from config import CTA_RESERVE, SHOP_NAME
-from engine.render import W, card_sprite, ease_back, ease_out, lerp
+from engine.render import W, card_sprite, ease_back, ease_out, img_sprite, lerp
 from engine.render import Short
 from engine.widgets import box_sprite, burst, cta_panel, fade, pop_in, stamp
 
-EVENTS = [  # 日付, 名前, 補足, 色
-    ("11/21", "神の支配", "OP-18／ウォーターセブン", (40, 40, 60)),
-    ("12/19", "スタートデッキ2種", "ST-37・ST-38", (200, 60, 60)),
-    ("1/30", "EAST BLUE", "EB-06", (40, 110, 200)),
-    ("2/27", "応答せよ、世界", "OP-19／エッグヘッド", (60, 150, 140)),
-    ("4/24", "夢の一枚", "PEB-01／全カードキラ", (210, 160, 40)),
+EVENTS = [  # 日付, 名前, 補足, 色, 公式画像
+    ("11/21", "神の支配", "OP-18／ウォーターセブン", (40, 40, 60), ["box_op18"]),
+    ("12/19", "スタートデッキ2種", "ST-37・ST-38", (200, 60, 60), ["box_st37", "box_st38"]),
+    ("1/30", "EAST BLUE", "EB-06", (40, 110, 200), ["box_eb06"]),
+    ("2/27", "応答せよ、世界", "OP-19／エッグヘッド", (60, 150, 140), ["box_op19"]),
+    ("4/24", "夢の一枚", "PEB-01／全カードキラ", (210, 160, 40), []),
 ]
+
+
+def product(c, imgs, x, y, h, t, k=1.0):
+    if not imgs:  # 画像未公開
+        c.paste(card_sprite(int(h * 0.55), h, (210, 160, 40), "", "", "", back=True), x, y, scale=k)
+        c.text("画像\n未公開", x, y, 44, scale=k, fnt="dela", fill=(255, 255, 255), stroke=6)
+        return
+    for j, name in enumerate(imgs):
+        dx = (j - (len(imgs) - 1) / 2) * 90
+        c.paste(img_sprite(name, h, shine=(t * 0.5 + j * 0.3) % 1.5), x + dx, y + j * 30, scale=k,
+                rot=(j - (len(imgs) - 1) / 2) * -8)
 
 
 def timeline(c, f, upto):
     t = f["t"]
     c.d.rectangle((150, 400, 162, 400 + 142 * len(EVENTS)), fill=(255, 255, 255, 120))
-    for i, (date, name, sub, col) in enumerate(EVENTS[: upto + 1]):
+    for i, (date, name, sub, col, imgs) in enumerate(EVENTS[: upto + 1]):
         y = 465 + i * 142
         cur = i == upto
         k = ease_back(((t if cur else 9) - 0.0) / 0.35)
         c.d.ellipse((136, y - 20, 176, y + 20), fill=col + (255,), outline=(255, 255, 255), width=5)
         x = lerp(1100, 0, k)
-        c.panel((200 + x, y - 65, 1020 + x, y + 65), 34, fill=(255, 255, 255, 245 if cur else 200),
+        c.panel((200 + x, y - 65, 760 + x, y + 65), 34, fill=(255, 255, 255, 245 if cur else 200),
                 outline=col + (255,) if cur else None, width=6 if cur else 0)
-        c.text(date, 300 + x, y, 54, fnt="dela", fill=col)
-        c.text(name, 410 + x, y - 22, 46, anchor="lm", fnt="noto", fill=(30, 30, 30), align="left")
-        c.text(sub, 410 + x, y + 30, 32, anchor="lm", fnt="noto", fill=(110, 110, 120), align="left")
+        c.text(date, 290 + x, y, 46, fnt="dela", fill=col)
+        c.text(name, 380 + x, y - 22, 40, anchor="lm", fnt="noto", fill=(30, 30, 30), align="left")
+        c.text(sub, 380 + x, y + 28, 28, anchor="lm", fnt="noto", fill=(110, 110, 120), align="left")
+    imgs = EVENTS[upto][4]
+    product(c, imgs, 905, 760, 420, t, ease_back(t / 0.4))
 
 
 def intro(c, f):
     t = f["t"]
     burst(c, W / 2, 760, 900, t, (255, 120, 140), alpha=45)
-    for i, col in enumerate([(40, 40, 60), (200, 60, 60), (40, 110, 200), (60, 150, 140), (210, 160, 40)]):
+    for i, name in enumerate(["box_op18", "box_st37", "box_eb06", "box_op19", "box_st38"]):
         k = ease_back((t - 0.1 - i * 0.1) / 0.35)
-        c.paste(card_sprite(220, 300, col, "", "", "", back=True), 220 + i * 160, 760 + (i % 2) * 40,
-                scale=k, rot=(i - 2) * 8)
+        c.paste(img_sprite(name, 420), 220 + i * 160, 740 + (i % 2) * 40, scale=k, rot=(2 - i) * 8)
     if f["li"] >= 1:
         stamp(c, "財布の準備は？", W / 2, 1090, f["lt"], 0.0, color=(200, 40, 60), size=100, rot=-4)
 
