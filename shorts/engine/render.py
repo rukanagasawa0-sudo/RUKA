@@ -493,7 +493,8 @@ class Short:
     scenes: list = field(default_factory=list)
     accent: tuple = (255, 220, 0)
     uses_official: bool = True
-    names: dict = field(default_factory=dict)   # 画面に出す名前の上書き {VOICEVOX名: 表示名}
+    names: dict = field(default_factory=dict)
+    show_credit: bool = False   # 画面下の小さいクレジット（VOICEVOX名・画像表記）。概要欄に書くので既定はオフ   # 画面に出す名前の上書き {VOICEVOX名: 表示名}
 
     def scene(self, draw, *lines, **kw):
         ls = [l if isinstance(l, Line) else Line(*l) for l in lines]
@@ -574,7 +575,7 @@ class Short:
         self._stripes = ov
         return self._bg_img
 
-    def frame(self, T):
+    def frame(self, T, sub=True, scene=True, title=True):
         img = self._bg().copy()
         off = int((T * 40) % 90)
         img.alpha_composite(self._stripes.crop((off, off, off + W, off + H)))
@@ -600,12 +601,14 @@ class Short:
                 lp = (T - ln.start) / max(ln.dur, 0.01)
         info = dict(T=T, t=lt, dur=sc.dur, li=li, lp=lp, line=cur, scene=sc,
                     lt=(T - cur.start) if cur else -1, short=self)
-        sc.draw(c, info)
-        if sc.title:
+        if scene:
+            sc.draw(c, info)
+        if sc.title and title:
             self.draw_title(c, T)
-        if sc.sub and cur is not None:
+        if sub and sc.sub and cur is not None:
             self.draw_sub(c, cur, T)
-        self.draw_credit(c)
+        if self.show_credit:
+            self.draw_credit(c)
         # 進行バー
         p = T / self.duration
         c.d.rectangle((0, H - 10, int(W * p), H), fill=self.accent + (255,))

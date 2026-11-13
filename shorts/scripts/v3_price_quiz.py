@@ -101,7 +101,7 @@ def top3(c, f):
         c.text(yen(v), 990 + x, y + 50, 54, anchor="rm", fnt="dela", fill=(30, 30, 30))
     if f["li"] >= 1:
         lt = t - (f["scene"].lines[1].start - f["scene"].start)
-        stamp(c, "全部ルフィ！！", W / 2, 1180, lt, 0, size=90, rot=-6)
+        stamp(c, "全部ルフィ！！", W / 2, 1150, lt, 0, size=64, rot=0)
 
 
 def outro(c, f):

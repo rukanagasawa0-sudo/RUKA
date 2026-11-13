@@ -53,8 +53,13 @@ def box_sprite(w, h, color, title, code="", accent=(255, 220, 0)):
     return img
 
 
+CHECK_MODE = False   # 重なりチェック中は背景演出（放射線）を描かない
+
+
 def burst(c, x, y, r, t, color=(255, 230, 80), n=18, alpha=110):
     """回転する放射線。"""
+    if CHECK_MODE:
+        return
     pts = []
     for i in range(n):
         a0 = t * 0.6 + i * 2 * math.pi / n
@@ -90,7 +95,7 @@ def stamp(c, s, x, y, t, delay, color=(225, 30, 50), size=96, rot=-8):
     if t < delay:
         return
     k = ease_back((t - delay) / 0.25)
-    sc = lerp(2.2, 1.0, k)
+    sc = lerp(1.5, 1.0, k)
     c.text(s, x, y, size, scale=sc, alpha=clamp((t - delay) / 0.12), rot=rot, fnt="dela",
            fill=color, stroke=10, stroke_fill=(255, 255, 255))
 
@@ -99,7 +104,7 @@ def cta_panel(c, t, shop, line1, line2, accent=(255, 220, 0), delay=0.0):
     k = ease_back((t - delay) / 0.4)
     if k <= 0:
         return
-    y = lerp(1400, 820, k)
+    y = lerp(560, 820, k)
     c.panel((70, y - 330, 1010, y + 330), 44, fill=(20, 20, 30, 235), outline=accent + (255,), width=10)
     from config import SHOP_INFO
     c.text(shop, W / 2, y - 240, 72, fnt="dela", fill=accent, stroke=6, max_w=880)

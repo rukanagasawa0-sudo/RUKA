@@ -56,23 +56,26 @@ def point2(c, f):
 
 def point3(c, f):
     t = f["t"]
+    amano = f["li"] >= 1
+    lt = t - (f["scene"].lines[1].start - f["scene"].start) if amano else t
     burst(c, W / 2, 760, 900, t, (255, 230, 120), alpha=45)
-    c.text("シークレットレア", W / 2, 410, 84, fnt="dela", fill=(255, 230, 80), stroke=8)
-    for i, cid in enumerate(["OP18-118", "OP18-119"]):
-        k = ease_back((t - 0.2 - i * 0.25) / 0.4)
-        spr = img_sprite("cards/" + cid, 520, shine=(t * 0.5 + i * 0.4) % 1.6, glow=(255, 230, 120))
-        c.paste(spr, 290 + i * 500, 760, scale=k, rot=(5 if i == 0 else -5) * k)
-    if f["li"] >= 1:
-        lt = t - (f["scene"].lines[1].start - f["scene"].start)
-        c.panel((70, 1060, 1010, 1190), 40, fill=(20, 20, 30, 225), shadow=False)
-        c.text("さらに *天野喜孝* 描き下ろしパラレルも！", W / 2, 1125, 50, fnt="noto", fill=(255, 255, 255),
-               hl=(255, 220, 0), alpha=fade(lt))
+    if not amano:
+        c.text("シークレットレア", W / 2, 410, 84, fnt="dela", fill=(255, 230, 80), stroke=8)
+        cards = [("cards/OP18-118", "ルフィ"), ("cards/OP18-119", "シャムロック聖")]
+    else:
+        c.text("*天野喜孝*描き下ろし\nパラレル", W / 2, 440, 66, fnt="dela", fill=(255, 255, 255), stroke=8,
+               hl=(255, 230, 80), scale=ease_back(lt / 0.3))
+        cards = [("cards/amano_OP18-119", "シャムロック聖"), ("cards/amano_OP17-119", "ロキ")]
+    for i, (cid, nm) in enumerate(cards):
+        k = ease_back((lt - 0.15 - i * 0.2) / 0.4)
+        spr = img_sprite(cid, 500, shine=(t * 0.5 + i * 0.4) % 1.6, glow=(255, 230, 120))
+        c.paste(spr, 290 + i * 500, 800, scale=k, rot=(5 if i == 0 else -5) * k)
 
 
 def outro(c, f):
     t = f["t"]
     cta_panel(c, t, SHOP_NAME, "11/21(土)\n神の支配 発売！", CTA_RESERVE, accent=(255, 140, 190))
-    c.text("※情報は2026/11/13時点。詳細は公式サイトをご確認ください。", W / 2, 1200, 26, fnt="noto",
+    c.text("※情報は2026/11/13時点。詳細は公式サイトをご確認ください。", W / 2, 1178, 24, fnt="noto",
            fill=(255, 255, 255), stroke=3, max_w=1000)
 
 

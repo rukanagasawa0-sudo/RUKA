@@ -60,13 +60,13 @@ def step(i):
         timeline(c, f, i)
         if i == 4 and f["li"] >= 1:
             lt = f["t"] - (f["scene"].lines[1].start - f["scene"].start)
-            stamp(c, "1パック8枚 全部キラ！", W / 2, 1165, lt, 0.0, color=(210, 160, 40), size=66, rot=-3)
+            stamp(c, "1パック8枚 全部キラ！", W / 2, 1148, lt, 0.0, color=(210, 160, 40), size=58, rot=-2)
     return draw
 
 
 def outro(c, f):
     cta_panel(c, f["t"], SHOP_NAME, "予約は\n*お早めに*！", CTA_RESERVE, accent=(255, 120, 140))
-    c.text("※2026/11/13時点の発表内容。発売日・内容は変更の可能性があります。", W / 2, 1200, 26, fnt="noto",
+    c.text("※2026/11/13時点の発表内容。発売日・内容は変更の可能性があります。", W / 2, 1178, 24, fnt="noto",
            fill=(255, 255, 255), stroke=3, max_w=1000)
 
 

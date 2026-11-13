@@ -76,7 +76,7 @@ def outro(c, f):
     else:
         cta_panel(c, f["lt"] if f["li"] == 2 else 9, SHOP_NAME, "第18弾 神の支配", CTA_RESERVE)
     c.text("※2026/11/13時点の買取相場（トレカの地図調べ）。相場は日々変動します。",
-           W / 2, 1200, 26, fnt="noto", fill=(255, 255, 255), stroke=3, max_w=1000)
+           W / 2, 1178, 24, fnt="noto", fill=(255, 255, 255), stroke=3, max_w=1000)
 
 
 def make():
