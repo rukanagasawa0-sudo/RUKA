@@ -101,9 +101,9 @@ def make():
             lines.append(Line("ryusei_hot", f"定価5280円が…*{yen(buy)}*！約*{ratio:.1f}倍*だ！",
                               f"定価5280円が、{buy}円！約{ratio:.1f}倍だ！", "kira"))
             lines.append(Line("zunda_namida", "なんで当時\n買っておかなかったのだ……", "なんで当時買っておかなかったのだ……"))
-        s.scene(rank_scene(rank, name, code, price, buy, color), *lines, min_dur=3.0)
+        s.scene(rank_scene(rank, name, code, price, buy, color), *lines, min_dur=2.6)
     s.scene(outro,
             ("ryusei", "そして*11月21日*、第18弾*神の支配*が発売！", "そして11月21日、第18弾、かみのしはいが発売！", "whoosh"),
             ("zunda", "今度こそ*発売日に確保*しておくのだ！"),
-            ("ryusei_hot", "君が持ってるBOXも*コメント*で教えてくれ！", None, "ding", 0.12, 0.8))
+            ("ryusei_hot", "君が持ってるBOXも*コメント*で教えてくれ！", None, "ding", 0.05, 0.6))
     return s

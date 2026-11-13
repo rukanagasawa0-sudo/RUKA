@@ -455,6 +455,36 @@ def card_sprite(w, h, color, label="", sub="", rarity="", shine=0.0, back=False,
     return img
 
 
+# ---------------------------------------------------------------- tempo
+TEMPO = 1.2          # 全キャラ共通の話速倍率（ショート向けにテンポよく）
+MAX_PAUSE = 0.14     # 読点などで空く無音の上限（秒）
+
+
+def tighten(wav, max_pause=MAX_PAUSE, thr=0.012, win=0.01):
+    """セリフ内の長すぎる無音（読点の間など）を max_pause まで詰める。"""
+    n = int(win * SR)
+    if len(wav) < n * 4:
+        return wav
+    frames = len(wav) // n
+    loud = np.abs(wav[: frames * n]).reshape(frames, n).max(axis=1) > thr
+    keep = np.ones(frames, dtype=bool)
+    lim = int(max_pause / win)
+    i = 0
+    while i < frames:
+        if not loud[i]:
+            j = i
+            while j < frames and not loud[j]:
+                j += 1
+            if i > 0 and j < frames and j - i > lim:   # 文中の無音だけ（頭と末尾は除く）
+                keep[i + lim // 2: j - lim // 2] = False
+            i = j
+        else:
+            i += 1
+    mask = np.repeat(keep, n)
+    out = np.concatenate([wav[: frames * n][mask], wav[frames * n:]])
+    return out.astype(np.float32)
+
+
 # ---------------------------------------------------------------- script model
 @dataclass
 class Line:
@@ -462,7 +492,7 @@ class Line:
     text: str
     say: str = None
     sfx: str = None
-    gap: float = 0.12
+    gap: float = 0.05
     hold: float = 0.0
     after: tuple = ()      # ((効果音名, セリフ終了後の秒), ...)
     # 計算値
@@ -509,7 +539,8 @@ class Short:
             lt = 0.25 if sc is self.scenes[0] else 0.05
             for ln in sc.lines:
                 ch = CHARS[ln.spk]
-                ln.wav = synth(ln.say or ln.text.replace("*", ""), ch["id"], speed=ch["speed"])
+                ln.wav = tighten(synth(ln.say or ln.text.replace("*", ""), ch["id"],
+                                       speed=round(ch["speed"] * TEMPO, 2)))
                 ln.start = t + lt
                 ln.dur = len(ln.wav) / SR
                 lt += ln.dur + ln.gap + ln.hold

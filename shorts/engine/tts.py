@@ -63,7 +63,7 @@ def synth(text, speaker, speed=1.15, pitch=0.0, intonation=1.15, volume=1.0):
                     {"text": text, "speaker": speaker}), timeout=30)
                 q = json.loads(q)
                 q.update(speedScale=speed, pitchScale=pitch, intonationScale=intonation,
-                         volumeScale=volume, prePhonemeLength=0.05, postPhonemeLength=0.08,
+                         volumeScale=volume, prePhonemeLength=0.02, postPhonemeLength=0.04,
                          outputSamplingRate=SR)
                 raw = _post(f"{base}/synthesis?speaker={speaker}",
                             json.dumps(q).encode(), timeout=180)
