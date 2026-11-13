@@ -12,3 +12,8 @@ cards/*.json
 
 .DS_Store
 *.log
+
+# shorts
+shorts/cache/
+shorts/output/preview/
+__pycache__/
