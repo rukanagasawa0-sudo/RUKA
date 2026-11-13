@@ -89,7 +89,7 @@ def make():
             ("ryusei_hot", "甘い！買取価格が*定価の何倍か*、ランキングで見ていくぞ！", None, "impact"))
     for rank, name, say, code, price, buy, color in DATA:
         ratio = buy / price
-        lines = [Line("ryusei_hot", f"第{rank}位！*{name.replace(chr(10), '')}*",
+        lines = [Line("ryusei_hot", f"第{rank}位！*{name.replace(chr(10), ' ' if name.isascii() else '')}*",
                       f"第{rank}位！{say}！", "drumroll+impact" if rank <= 2 else "pop")]
         if rank == 5:
             lines.append(Line("zunda", f"定価5500円が*{yen(buy)}*！？", f"定価5500円が、{buy}円！？"))
@@ -100,7 +100,7 @@ def make():
         if rank == 1:
             lines.append(Line("ryusei_hot", f"定価5280円が…*{yen(buy)}*！約*{ratio:.1f}倍*だ！",
                               f"定価5280円が、{buy}円！約{ratio:.1f}倍だ！", "kira"))
-            lines.append(Line("zunda_namida", "なんで当時買っておかなかったのだ……"))
+            lines.append(Line("zunda_namida", "なんで当時\n買っておかなかったのだ……", "なんで当時買っておかなかったのだ……"))
         s.scene(rank_scene(rank, name, code, price, buy, color), *lines, min_dur=3.0)
     s.scene(outro,
             ("ryusei", "そして*11月21日*、第18弾*神の支配*が発売！", "そして11月21日、第18弾、かみのしはいが発売！", "whoosh"),

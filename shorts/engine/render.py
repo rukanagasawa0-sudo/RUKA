@@ -78,6 +78,7 @@ def lerp(a, b, x):
 # ---------------------------------------------------------------- text sprites
 _font_cache = {}
 _sprite_cache = {}
+_hard_cache = {}
 
 
 def font(name, size):
@@ -101,26 +102,171 @@ def _segments(s):
     return out
 
 
-def wrap(segs, fnt, max_w):
-    lines, cur = [], []
-    for ch, hl in segs:
-        if ch == "\n":
+PARTICLES = set("はがをにでへともの")
+
+
+def _break_cost(u):
+    last = u[-1][0]
+    if last in "。！？!?":
+        return 0.0
+    if last in "、…":
+        return 0.4
+    return 1.5
+
+
+def _ctype(ch):
+    o = ord(ch)
+    if ch in NO_HEAD or ch in "」』）)】":
+        return "close"
+    if ch in "「『（(【":
+        return "open"
+    if 0x3041 <= o <= 0x309F:
+        return "hira"
+    if 0x30A0 <= o <= 0x30FF or ch == "ー":
+        return "kata"
+    if ch.isdigit() or ch in ",.%％/／:：+＋-−×~〜" or (ch.isascii() and ch.isalpha()):
+        return "alnum"
+    if ch == " ":
+        return "space"
+    return "kanji"
+
+
+def _units(segs):
+    """文節っぽい単位に分ける。強調(*)部分は1単位として途中で切らない。"""
+    units, cur = [], []
+
+    def flush():
+        if cur:
+            units.append(list(cur))
+            cur.clear()
+
+    for i, (ch, hl) in enumerate(segs):
+        if cur:
+            pch, phl = cur[-1]
+            pt, ct = _ctype(pch), _ctype(ch)
+            brk = False
+            if hl and phl:
+                brk = False                      # 強調語句の途中では切らない
+            elif phl and not hl:
+                brk = ct not in ("close", "hira")  # 強調の直後の助詞などはくっつける
+            elif hl and not phl:
+                brk = pt not in ("open",) and not (pt == "alnum" and ct == "alnum")
+            elif pch in "、。！？!?…" and ct != "close":
+                brk = True                       # 句読点の後
+            elif pt == "space":
+                brk = True
+            elif pt == "close" and ct not in ("close",):
+                brk = pch in "」』）)】"
+            elif ct == "open":
+                brk = True
+            elif pt == "hira" and ct in ("kata", "alnum"):
+                brk = True                       # ひらがなの後にカタカナ・数字
+            elif pt == "hira" and ct == "kanji":
+                run = 0                          # 直前のひらがなの長さ
+                for c2, _ in reversed(cur):
+                    if _ctype(c2) != "hira":
+                        break
+                    run += 1
+                brk = run >= 2 or pch in PARTICLES   # 「買い取る」は切らない
+            elif (pt == "hira" and pch in PARTICLES and ct == "hira" and ch not in PARTICLES and len(cur) >= 2
+                  and _ctype(cur[-2][0]) in ("kanji", "kata", "alnum")):
+                brk = True                       # 「カードは|どれ」
+            if brk:
+                flush()
+        cur.append((ch, hl))
+    flush()
+    return units
+
+
+def _fill(units, fnt, width):
+    lines, cur, cw = [], [], 0.0
+    for u in units:
+        uw = fnt.getlength("".join(c for c, _ in u))
+        if cur and cw + uw > width:
             lines.append(cur)
-            cur = []
-            continue
-        test = "".join(c for c, _ in cur) + ch
-        if max_w and fnt.getlength(test) > max_w and cur:
-            if ch in NO_HEAD:  # 禁則：行頭に来させない
-                carry = [cur.pop()] if len(cur) > 1 else []
-                lines.append(cur)
-                cur = carry + [(ch, hl)]
-            else:
-                lines.append(cur)
-                cur = [(ch, hl)]
-        else:
-            cur.append((ch, hl))
+            cur, cw = [], 0.0
+        cur = cur + u
+        cw += uw
     if cur:
         lines.append(cur)
+    return lines
+
+
+def _hard_split(u, fnt, max_w):
+    """1単位が長すぎる時だけ文字単位で割る。"""
+    out, cur = [], []
+    for ch in u:
+        if cur and fnt.getlength("".join(c for c, _ in cur + [ch])) > max_w and ch[0] not in NO_HEAD:
+            out.append(cur)
+            cur = []
+        cur.append(ch)
+    if cur:
+        out.append(cur)
+    return out
+
+
+def _layout(units, fnt, max_w, n):
+    """units を n 行に分ける最良の区切り（区切り位置の自然さ＋行長のそろい具合）。"""
+    ws = [fnt.getlength("".join(c for c, _ in u)) for u in units]
+    total = sum(ws)
+    avg = total / n
+    m = len(units)
+    INF = float("inf")
+    dp = [[INF] * (n + 1) for _ in range(m + 1)]
+    back = [[0] * (n + 1) for _ in range(m + 1)]
+    dp[0][0] = 0.0
+    for i in range(1, m + 1):
+        for k in range(1, n + 1):
+            w = 0.0
+            for j in range(i - 1, -1, -1):
+                w += ws[j]
+                if w > max_w:
+                    break
+                if dp[j][k - 1] == INF:
+                    continue
+                cost = dp[j][k - 1] + 2.0 * ((w - avg) / max_w) ** 2
+                if w < max_w * 0.22:
+                    cost += 1.5                  # 極端に短い行は避ける
+                if i < m:
+                    cost += _break_cost(units[i - 1])
+                if cost < dp[i][k]:
+                    dp[i][k] = cost
+                    back[i][k] = j
+    if dp[m][n] == INF:
+        return None
+    lines, i = [], m
+    for k in range(n, 0, -1):
+        j = back[i][k]
+        lines.append([ch for u in units[j:i] for ch in u])
+        i = j
+    return lines[::-1]
+
+
+def wrap(segs, fnt, max_w):
+    paras, cur = [], []
+    for ch, hl in segs:
+        if ch == "\n":
+            paras.append(cur)
+            cur = []
+        else:
+            cur.append((ch, hl))
+    paras.append(cur)
+    lines = []
+    wrap.hard = False
+    for para in paras:
+        if not max_w or fnt.getlength("".join(c for c, _ in para)) <= max_w:
+            lines.append(para)
+            continue
+        units = []
+        for u in _units(para):
+            if fnt.getlength("".join(c for c, _ in u)) > max_w:
+                units.extend(_hard_split(u, fnt, max_w))
+                wrap.hard = True
+            else:
+                units.append(u)
+        n = len(_fill(units, fnt, max_w))
+        best = _layout(units, fnt, max_w, n) or _fill(units, fnt, max_w)
+        lines.extend(best)
     return lines
 
 
@@ -131,6 +277,7 @@ def text_sprite(s, size, fnt="noto", fill=(255, 255, 255), stroke=0, stroke_fill
         return _sprite_cache[key]
     f = font(fnt, size)
     lines = wrap(_segments(s), f, max_w)
+    _hard_cache[(s, size)] = wrap.hard
     lh = int(size * spacing)
     widths = [f.getlength("".join(c for c, _ in ln)) for ln in lines]
     pad = stroke + 6 + shadow
@@ -488,7 +635,7 @@ class Short:
         c.paste(tag, x0 + 92, y0 - 5, "lm")
         size = 66
         spr = text_sprite(ln.text, size, "noto", fill=(30, 30, 30), hl=(225, 30, 50), max_w=900)
-        while spr.height > (y1 - y0 - 40) and size > 40:
+        while (spr.height > (y1 - y0 - 40) or _hard_cache.get((ln.text, size))) and size > 40:
             size -= 4
             spr = text_sprite(ln.text, size, "noto", fill=(30, 30, 30), hl=(225, 30, 50), max_w=900)
         c.paste(spr, (x0 + x1) / 2, (y0 + y1) / 2 + 8, "mm", scale=lerp(0.85, 1, k))
