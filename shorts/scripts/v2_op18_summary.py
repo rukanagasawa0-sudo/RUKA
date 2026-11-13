@@ -72,6 +72,25 @@ def point3(c, f):
         c.paste(spr, 290 + i * 500, 800, scale=k, rot=(5 if i == 0 else -5) * k)
 
 
+def point4(c, f):
+    t = f["t"]
+    burst(c, W / 2, 760, 900, t, (255, 140, 190), alpha=45)
+    knights = f["li"] >= 1
+    lt = t - (f["scene"].lines[1].start - f["scene"].start) if knights else t
+    if knights:
+        c.text("*神の騎士団*パラレル", W / 2, 410, 72, fnt="dela", fill=(255, 255, 255), stroke=8,
+               hl=(255, 200, 230), scale=ease_back(lt / 0.3))
+        c.paste(img_sprite("cards/knights_OP18-065", 640, shine=(t * 0.4) % 1.6, glow=(255, 140, 190)),
+                W / 2, 800, scale=ease_back(lt / 0.4))
+        c.text("軍子宮", W / 2, 1150, 40, fnt="noto", fill=(255, 255, 255), stroke=5, alpha=fade(lt, 0.3))
+    else:
+        c.text("*スーパーパラレル*", W / 2, 410, 72, fnt="dela", fill=(255, 255, 255), stroke=8,
+               hl=(255, 230, 80), scale=ease_back(t / 0.3))
+        c.paste(img_sprite("cards/sp_OP18-031", 640, shine=(t * 0.4) % 1.6, glow=(255, 230, 120)),
+                W / 2, 800, scale=ease_back((t - 0.1) / 0.4))
+        c.text("ニコ・ロビン", W / 2, 1150, 40, fnt="noto", fill=(255, 255, 255), stroke=5, alpha=fade(t, 0.3))
+
+
 def outro(c, f):
     t = f["t"]
     cta_panel(c, t, SHOP_NAME, "11/21(土)\n神の支配 発売！", CTA_RESERVE, accent=(255, 140, 190))
@@ -95,8 +114,11 @@ def make():
             ("tsumugi", "*カルー*がリーダー！？それは推せる〜！", "カルーがリーダー！？それは推せるー！", "pop"))
     s.scene(point3,
             ("metan", "シークレットは*ルフィ*と*シャムロック聖*！", "シークレットは、ルフィと、シャムロックせい！", "kira"),
-            ("metan", "さらに*天野喜孝さん*の描き下ろしパラレルも収録！", "さらに、天野よしたかさんの描き下ろしパラレルも収録！", "pop"),
-            ("tsumugi", "それ絶対*神引き*したいやつ……！", "それ絶対、神引きしたいやつ！"))
+            ("metan", "さらに*天野喜孝さん*の描き下ろしパラレルも収録！", "さらに、天野よしたかさんの描き下ろしパラレルも収録！", "pop"))
+    s.scene(point4,
+            ("metan", "スーパーパラレルは*ニコ・ロビン*！", "スーパーパラレルは、ニコ・ロビン！", "kira"),
+            ("metan", "4周年記念の*神の騎士団パラレル*も登場よ。", "4周年記念の、神の騎士団パラレルも登場よ。", "pop"),
+            ("tsumugi", "どれも*神引き*したいやつ……！", "どれも、神引きしたいやつ！"))
     s.scene(outro,
             ("metan", "発売日に後悔しないように、*保存*して見返してね。", "発売日に後悔しないように、保存して見返してね。", "whoosh"),
             ("tsumugi", "みんなは*どのリーダー*使う？コメントで教えて〜！", "みんなは、どのリーダー使う？コメントで教えてー！", "ding", 0.12, 0.8))
