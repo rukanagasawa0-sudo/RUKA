@@ -346,6 +346,7 @@ class Short:
     scenes: list = field(default_factory=list)
     accent: tuple = (255, 220, 0)
     uses_official: bool = True
+    names: dict = field(default_factory=dict)   # 画面に出す名前の上書き {VOICEVOX名: 表示名}
 
     def scene(self, draw, *lines, **kw):
         ls = [l if isinstance(l, Line) else Line(*l) for l in lines]
@@ -478,7 +479,7 @@ class Short:
         col = ch["color"]
         c.panel((x0, y0, x1, y1), 34, fill=(255, 255, 255, 240), outline=col + (255,), width=8)
         # 名札
-        tag = text_sprite(ch["name"], 40, "round", fill=(255, 255, 255))
+        tag = text_sprite(self.names.get(ch["vv"], ch["name"]), 40, "round", fill=(255, 255, 255))
         tw = tag.width + 70
         c.rrect((x0 + 30, y0 - 40, x0 + 30 + tw, y0 + 30), 30, fill=col + (255,))
         bounce = abs(math.sin((T - ln.start) * 9)) * 6 if T < ln.start + ln.dur else 0
