@@ -17,3 +17,4 @@ cards/*.json
 shorts/cache/
 shorts/output/preview/
 __pycache__/
+shorts/output/*.zip
