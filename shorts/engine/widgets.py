@@ -101,6 +101,9 @@ def cta_panel(c, t, shop, line1, line2, accent=(255, 220, 0), delay=0.0):
         return
     y = lerp(1400, 820, k)
     c.panel((70, y - 330, 1010, y + 330), 44, fill=(20, 20, 30, 235), outline=accent + (255,), width=10)
-    c.text(shop, W / 2, y - 220, 64, fnt="dela", fill=accent, stroke=6, max_w=880)
-    c.text(line1, W / 2, y - 40, 72, fnt="dela", fill=(255, 255, 255), stroke=6, max_w=880, hl=accent)
-    c.text(line2, W / 2, y + 170, 54, fnt="noto", fill=(255, 255, 255), stroke=5, max_w=880, hl=accent)
+    from config import SHOP_INFO
+    c.text(shop, W / 2, y - 240, 72, fnt="dela", fill=accent, stroke=6, max_w=880)
+    c.text(line1, W / 2, y - 60, 72, fnt="dela", fill=(255, 255, 255), stroke=6, max_w=880, hl=accent)
+    c.text(line2, W / 2, y + 135, 50, fnt="noto", fill=(255, 255, 255), stroke=5, max_w=880, hl=accent)
+    c.rrect((110, y + 235, 970, y + 300), 32, fill=accent + (255,))
+    c.text(SHOP_INFO, W / 2, y + 266, 36, fnt="noto", fill=(20, 20, 30), max_w=840)
