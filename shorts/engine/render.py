@@ -323,10 +323,11 @@ class Ctx:
         ax = {"l": 0, "m": 0.5, "r": 1}[anchor[0]]
         ay = {"t": 0, "m": 0.5, "b": 1}[anchor[1]]
         px, py = int(x - spr.width * ax), int(y - spr.height * ay)
-        if px >= W or py >= H or px + spr.width <= 0 or py + spr.height <= 0:
+        IW, IH = self.img.size          # 縦型以外（横型サムネ等）にも対応
+        if px >= IW or py >= IH or px + spr.width <= 0 or py + spr.height <= 0:
             return
         sx, sy = max(0, -px), max(0, -py)
-        ex, ey = min(spr.width, W - px), min(spr.height, H - py)
+        ex, ey = min(spr.width, IW - px), min(spr.height, IH - py)
         self.img.alpha_composite(spr.crop((sx, sy, ex, ey)), (max(0, px), max(0, py)))
 
     def text(self, s, x, y, size=80, anchor="mm", scale=1.0, alpha=1.0, rot=0, **kw):
