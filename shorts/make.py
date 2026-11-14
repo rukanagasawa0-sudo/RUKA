@@ -1,4 +1,4 @@
-"""使い方:  python3 shorts/make.py [v1 v2 ...] [--preview]
+"""使い方:  python3 shorts/make.py [v2 v3 v5] [--preview]
 
 --preview を付けると動画は作らず、数枚の静止画（output/preview）だけ書き出す。
 """
@@ -11,10 +11,8 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 
 SCRIPTS = {
-    "v1": "scripts.v1_box_ranking",
     "v2": "scripts.v2_op18_summary",
     "v3": "scripts.v3_price_quiz",
-    "v4": "scripts.v4_meta_share",
     "v5": "scripts.v5_release_calendar",
 }
 

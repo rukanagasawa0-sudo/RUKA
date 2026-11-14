@@ -8,11 +8,11 @@ from engine.render import Short
 from engine.widgets import box_sprite, burst, cta_panel, fade, pop_in, stamp
 
 EVENTS = [  # 日付, 名前, 補足, 色, 公式画像
-    ("11/21", "神の支配", "ブースター OP-18／ウォーターセブン・エルバフ・アラバスタ", (40, 40, 60), ["box_op18"]),
-    ("12/19", "スタートデッキ2種", "ST-37 砂漠の王女と海賊たち／ST-38 バロックワークス", (200, 60, 60),
+    ("11/21", "神の支配", "OP-18／ウォーターセブン・エルバフ・アラバスタ", (40, 40, 60), ["box_op18"]),
+    ("12/19", "スタートデッキ2種", "ST-37 砂漠の王女と海賊たち\nST-38 バロックワークス", (200, 60, 60),
      ["box_st37", "box_st38"]),
     ("1/30", "EAST BLUE", "エクストラブースター EB-06", (40, 110, 200), ["box_eb06"]),
-    ("2/27", "応答せよ、世界", "ブースター OP-19／エッグヘッド編", (60, 150, 140), ["box_op19"]),
+    ("2/27", "応答せよ、世界", "OP-19／テーマはエッグヘッド", (60, 150, 140), ["box_op19"]),
     ("4/24", "夢の一枚", "PEB-01／1パック440円・全カードキラ", (210, 160, 40), []),
 ]
 
@@ -21,7 +21,7 @@ def product(c, imgs, x, y, h, t, k=1.0, label=True):
     if not imgs:  # 画像未公開
         c.paste(card_sprite(int(h * 0.62), h, (210, 160, 40), "", "", "", back=True), x, y, scale=k)
         if label:
-            c.text("画像\n未公開", x, y, 60, scale=k, fnt="dela", fill=(255, 255, 255), stroke=7)
+            c.text("画像\n未公開", x, y, 64, scale=k, fnt="dela", fill=(255, 255, 255))
         return
     n = len(imgs)
     for j, name in enumerate(imgs):
@@ -53,14 +53,11 @@ def timeline(c, f, upto):
     date, name, sub, col, imgs = EVENTS[upto]
     chips(c, upto, t)
     k = ease_back((t - 0.05) / 0.4)
-    product(c, imgs, W / 2, 735, 520, t, k, label=not (upto == 4 and f["li"] >= 1))
-    c.panel((80, 1020, 1000, 1172), 40, fill=(255, 255, 255, 245), outline=col + (255,), width=6)
-    c.text(f"*{date}* {name}", W / 2, 1068, 62, fnt="dela", fill=(30, 30, 30), hl=col, max_w=880,
-           alpha=min(1.0, max(0.0, t / 0.25)))
-    size = 38
-    while size > 24 and text_sprite(sub, size, "noto").width > 880:
-        size -= 2
-    c.text(sub, W / 2, 1135, size, fnt="noto", fill=(90, 90, 100), alpha=min(1.0, max(0.0, t / 0.25)))
+    product(c, imgs, W / 2, 715, 480, t, k, label=not (upto == 4 and f["li"] >= 1))
+    c.panel((60, 995, 1020, 1185), 40, fill=(255, 255, 255, 245), outline=col + (255,), width=6)
+    a = min(1.0, max(0.0, t / 0.25))
+    c.text(f"*{date}* {name}", W / 2, 1040, 64, fnt="dela", fill=(30, 30, 30), hl=col, max_w=900, alpha=a)
+    c.text(sub, W / 2, 1134, 40, fnt="noto", fill=(60, 60, 70), max_w=900, alpha=a, spacing=1.1)
 
 
 def intro(c, f):
@@ -84,15 +81,16 @@ def step(i):
 
 def outro(c, f):
     cta_panel(c, f["t"], SHOP_NAME, "発売日を\n*チェック*！", CTA_RESERVE, accent=(255, 120, 140))
-    c.text("※2026/11/13時点の発表内容。発売日・内容は変更の可能性があります。", W / 2, 1178, 24, fnt="noto",
+    c.text("※2026/11/13時点の発表内容です", W / 2, 1180, 32, fnt="noto",
            fill=(255, 255, 255), stroke=3, max_w=1000)
 
 
 def make():
     s = Short("v5_release_calendar", "ワンピカ\n*半年分*の発売日まとめ", ((40, 10, 30), (150, 40, 70)),
-              bgm="chill", accent=(255, 120, 140))
+              bgm="chill", accent=(255, 120, 140),
+              names={"波音リツ": "司会", "冥鳴ひまり": "Aさん"})
     s.scene(intro,
-            ("himari", "ねえリツ、これから*新弾*っていつ出るの？", "ねえリツ、これから新弾っていつ出るの？", "whoosh"),
+            ("himari", "ねえ、これから*新弾*っていつ出るの？", "ねえ、これから新弾っていつ出るの？", "whoosh"),
             ("ritsu_queen", "半年で*5商品*よ。財布の準備はできてる？", "半年で5商品よ。財布の準備はできてる？", "impact"))
     s.scene(step(0),
             ("ritsu", "まず*11月21日*、第18弾*神の支配*。舞台はウォーターセブン、エルバフ、アラバスタね。",

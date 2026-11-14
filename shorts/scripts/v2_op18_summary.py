@@ -41,11 +41,13 @@ def point1(c, f):
     if f["li"] >= 1:
         lt = t - (f["scene"].lines[1].start - f["scene"].start)
         chip(c, 3, "テーマは *3つの舞台*", 880, lt)
-        for i, (nm, col) in enumerate(THEMES):
+        widths = [400, 265, 295]           # 文字数に合わせた幅（同じ文字サイズで収まる）
+        x = (W - sum(widths) - 2 * 12) / 2
+        for i, ((nm, col), w) in enumerate(zip(THEMES, widths)):
             k = ease_back((lt - 0.3 - i * 0.25) / 0.3)
-            x = W / 2 + (i - 1) * 335
-            c.rrect((x - 160, 1015, x + 160, 1095), 40, fill=col + (255,), outline=(255, 255, 255), width=5)
-            c.text(nm, x, 1053, 36, fnt="dela", fill=(255, 255, 255), stroke=4, scale=k)
+            c.rrect((x, 1010, x + w, 1100), 45, fill=col + (255,), outline=(255, 255, 255), width=5)
+            c.text(nm, x + w / 2, 1053, 44, fnt="noto", fill=(255, 255, 255), scale=k)
+            x += w + 12
 
 
 def point2(c, f):
@@ -69,7 +71,7 @@ def point3(c, f):
         c.text("シークレットレア", W / 2, 410, 84, fnt="dela", fill=(255, 230, 80), stroke=8)
         cards = [("cards/OP18-118", "ルフィ"), ("cards/OP18-119", "シャムロック聖")]
     else:
-        c.text("*天野喜孝*描き下ろし\nパラレル", W / 2, 440, 66, fnt="dela", fill=(255, 255, 255), stroke=8,
+        c.text("*天野喜孝*描き下ろし\nパラレル", W / 2, 440, 66, fnt="dela", fill=(255, 255, 255), stroke=5,
                hl=(255, 230, 80), scale=ease_back(lt / 0.3))
         cards = [("cards/amano_OP18-119", "シャムロック聖"), ("cards/amano_OP17-119", "ロキ")]
     for i, (cid, nm) in enumerate(cards):
@@ -88,25 +90,26 @@ def point4(c, f):
                hl=(255, 200, 230), scale=ease_back(lt / 0.3))
         c.paste(img_sprite("cards/knights_OP18-065", 640, shine=(t * 0.4) % 1.6, glow=(255, 140, 190)),
                 W / 2, 800, scale=ease_back(lt / 0.4))
-        c.text("軍子宮", W / 2, 1150, 40, fnt="noto", fill=(255, 255, 255), stroke=5, alpha=fade(lt, 0.3))
+        c.text("軍子宮", W / 2, 1150, 46, fnt="noto", fill=(255, 255, 255), stroke=4, alpha=fade(lt, 0.3))
     else:
         c.text("*スーパーパラレル*", W / 2, 410, 72, fnt="dela", fill=(255, 255, 255), stroke=8,
                hl=(255, 230, 80), scale=ease_back(t / 0.3))
         c.paste(img_sprite("cards/sp_OP18-031", 640, shine=(t * 0.4) % 1.6, glow=(255, 230, 120)),
                 W / 2, 800, scale=ease_back((t - 0.1) / 0.4))
-        c.text("ニコ・ロビン", W / 2, 1150, 40, fnt="noto", fill=(255, 255, 255), stroke=5, alpha=fade(t, 0.3))
+        c.text("ニコ・ロビン", W / 2, 1150, 46, fnt="noto", fill=(255, 255, 255), stroke=4, alpha=fade(t, 0.3))
 
 
 def outro(c, f):
     t = f["t"]
     cta_panel(c, t, SHOP_NAME, "11/21(土)\n神の支配 発売！", CTA_RESERVE, accent=(255, 140, 190))
-    c.text("※情報は2026/11/13時点。詳細は公式サイトをご確認ください。", W / 2, 1178, 24, fnt="noto",
+    c.text("※2026/11/13時点の情報です", W / 2, 1180, 32, fnt="noto",
            fill=(255, 255, 255), stroke=3, max_w=1000)
 
 
 def make():
     s = Short("v2_op18_summary", "新弾*神の支配*\n買う前にこれだけ見て！", ((60, 20, 60), (200, 70, 120)),
-              bgm="pop", accent=(255, 200, 230))
+              bgm="pop", accent=(255, 200, 230),
+              names={"四国めたん": "司会", "春日部つむぎ": "Aさん"})
     s.scene(intro,
             ("tsumugi", "ねえねえ！来週発売の*新弾*、もうチェックした？", None, "whoosh"),
             ("metan", "*11月21日*発売の第18弾、*神の支配*。要点をサクッとまとめるわよ！",

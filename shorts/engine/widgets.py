@@ -96,8 +96,9 @@ def stamp(c, s, x, y, t, delay, color=(225, 30, 50), size=96, rot=-8):
         return
     k = ease_back((t - delay) / 0.25)
     sc = lerp(1.5, 1.0, k)
+    # 縁取りは文字サイズに比例（小さい文字に太い縁を付けると潰れる）
     c.text(s, x, y, size, scale=sc, alpha=clamp((t - delay) / 0.12), rot=rot, fnt="dela",
-           fill=color, stroke=10, stroke_fill=(255, 255, 255))
+           fill=color, stroke=max(4, int(size * 0.08)), stroke_fill=(255, 255, 255))
 
 
 def cta_panel(c, t, shop, line1, line2, accent=(255, 220, 0), delay=0.0):
@@ -107,8 +108,8 @@ def cta_panel(c, t, shop, line1, line2, accent=(255, 220, 0), delay=0.0):
     y = lerp(560, 820, k)
     c.panel((70, y - 330, 1010, y + 330), 44, fill=(20, 20, 30, 235), outline=accent + (255,), width=10)
     from config import SHOP_INFO
-    c.text(shop, W / 2, y - 240, 72, fnt="dela", fill=accent, stroke=6, max_w=880)
-    c.text(line1, W / 2, y - 60, 72, fnt="dela", fill=(255, 255, 255), stroke=6, max_w=880, hl=accent)
-    c.text(line2, W / 2, y + 135, 50, fnt="noto", fill=(255, 255, 255), stroke=5, max_w=880, hl=accent)
-    c.rrect((110, y + 235, 970, y + 300), 32, fill=accent + (255,))
-    c.text(SHOP_INFO, W / 2, y + 266, 36, fnt="noto", fill=(20, 20, 30), max_w=840)
+    c.text(shop, W / 2, y - 240, 72, fnt="dela", fill=accent, max_w=880)   # 暗いパネル上なので縁取りなし
+    c.text(line1, W / 2, y - 60, 72, fnt="dela", fill=(255, 255, 255), max_w=880, hl=accent)
+    c.text(line2, W / 2, y + 135, 52, fnt="noto", fill=(255, 255, 255), max_w=880, hl=accent)
+    c.rrect((100, y + 230, 980, y + 305), 36, fill=accent + (255,))
+    c.text(SHOP_INFO, W / 2, y + 266, 40, fnt="noto", fill=(20, 20, 30), max_w=860)
