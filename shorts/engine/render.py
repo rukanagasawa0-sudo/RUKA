@@ -576,6 +576,7 @@ class Short:
                 for name, dt in ln.after:
                     add(fx, audio.SFX[name](), ln.start + ln.dur + dt, 0.9)
         music = audio.bgm(n / SR, self.bgm)
+        music = np.pad(music, (0, max(0, n - len(music))))[:n]   # 端数で1サンプルずれるのを防ぐ
         # ダッキング：声がある所は BGM を下げる
         envv = np.abs(voice)
         k = int(0.15 * SR)
