@@ -456,8 +456,9 @@ def card_sprite(w, h, color, label="", sub="", rarity="", shine=0.0, back=False,
 
 
 # ---------------------------------------------------------------- tempo
-TEMPO = 1.2          # 全キャラ共通の話速倍率（ショート向けにテンポよく）
-MAX_PAUSE = 0.14     # 読点などで空く無音の上限（秒）
+TEMPO = 1.08         # 全キャラ共通の話速倍率（少し速め。上げすぎると会話が不自然になる）
+MAX_PAUSE = 0.25     # 読点などで空く無音の上限（秒）
+TURN_GAP = 0.28      # 話者が交代する時の間（秒）。同じ人が続ける時は Line.gap
 
 
 def tighten(wav, max_pause=MAX_PAUSE, thr=0.012, win=0.01):
@@ -492,7 +493,7 @@ class Line:
     text: str
     say: str = None
     sfx: str = None
-    gap: float = 0.05
+    gap: float = 0.1
     hold: float = 0.0
     after: tuple = ()      # ((効果音名, セリフ終了後の秒), ...)
     # 計算値
@@ -534,6 +535,7 @@ class Short:
     # ---------------------------------------------------------- timeline
     def build(self):
         t = 0.0
+        prev_vv, prev_gap = None, 0.0
         for sc in self.scenes:
             sc.start = t
             lt = 0.25 if sc is self.scenes[0] else 0.05
@@ -541,6 +543,9 @@ class Short:
                 ch = CHARS[ln.spk]
                 ln.wav = tighten(synth(ln.say or ln.text.replace("*", ""), ch["id"],
                                        speed=round(ch["speed"] * TEMPO, 2)))
+                if prev_vv is not None and prev_vv != ch["vv"]:
+                    lt += max(0.0, TURN_GAP - prev_gap)   # 掛け合いの「間」
+                prev_vv, prev_gap = ch["vv"], ln.gap + ln.hold
                 ln.start = t + lt
                 ln.dur = len(ln.wav) / SR
                 lt += ln.dur + ln.gap + ln.hold
