@@ -78,4 +78,4 @@ def horizontal():
 
 if __name__ == "__main__":
     print(vertical())
-    print(horizontal())
+    # print(horizontal())  # 横型は不要になったので出力しない
