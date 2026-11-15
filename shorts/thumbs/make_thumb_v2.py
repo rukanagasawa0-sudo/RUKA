@@ -79,3 +79,27 @@ def horizontal():
 if __name__ == "__main__":
     print(vertical())
     # print(horizontal())  # 横型は不要になったので出力しない
+
+
+def vertical_b():
+    """B案：天野喜孝パラレルを主役にした縦型。"""
+    W, H = 1080, 1920
+    img = background(W, H)
+    c = Ctx(img)
+    c.text("新弾 神の支配", W / 2, 180, 120, fnt="dela", fill=(255, 255, 255), stroke=12, stroke_fill=(120, 20, 60))
+    c.rrect((90, 270, 990, 400), 60, fill=(225, 30, 50, 255), outline=(255, 255, 255), width=8)
+    c.text("天野喜孝 描き下ろし", W / 2, 335, 76, fnt="dela", fill=(255, 255, 255))
+    c.paste(img_sprite("cards/amano_OP18-119", 900, glow=(255, 230, 120)), 330, 900, rot=6)
+    c.paste(img_sprite("cards/amano_OP17-119", 900, glow=(255, 230, 120)), 750, 920, rot=-6)
+    c.rrect((50, 1420, 1030, 1720), 60, fill=(255, 255, 255, 245), outline=(233, 84, 140, 255), width=12)
+    c.text("パラレル\n*収録！*", W / 2, 1570, 120, fnt="dela", fill=(30, 30, 30), hl=(225, 30, 50))
+    c.d.ellipse((800, 1250, 1060, 1510), fill=(255, 220, 60, 255), outline=(255, 255, 255), width=10)
+    c.text("11/21\n発売", 930, 1380, 66, fnt="dela", fill=(40, 20, 30), rot=-8)
+    c.text(SHOP_NAME, W / 2, 1815, 64, fnt="dela", fill=(255, 255, 255), stroke=6)
+    out = os.path.join(OUT, "v2_thumbnail_B_1080x1920.png")
+    img.convert("RGB").save(out)
+    return out
+
+
+if __name__ == "__main__":
+    print(vertical_b())
