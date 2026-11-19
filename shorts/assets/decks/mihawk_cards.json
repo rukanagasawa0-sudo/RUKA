@@ -1,0 +1,178 @@
+{
+ "OP14-020": {
+  "id": "OP14-020",
+  "no": "OP14-020",
+  "rarity": "L",
+  "type": "LEADER",
+  "name": "ジュラキュール・ミホーク",
+  "color": "緑",
+  "cost": "5",
+  "counter": "-",
+  "img": "https://www.onepiece-cardgame.com/images/cardlist/card/OP14-020.png"
+ },
+ "OP12-034": {
+  "id": "OP12-034",
+  "no": "OP12-034",
+  "rarity": "SR",
+  "type": "CHARACTER",
+  "name": "ペローナ",
+  "color": "緑",
+  "cost": "1",
+  "counter": "1000",
+  "img": "https://www.onepiece-cardgame.com/images/cardlist/card/OP12-034.png"
+ },
+ "OP07-022": {
+  "id": "OP07-022",
+  "no": "OP07-022",
+  "rarity": "R",
+  "type": "CHARACTER",
+  "name": "お玉",
+  "color": "緑",
+  "cost": "1",
+  "counter": "2000",
+  "img": "https://www.onepiece-cardgame.com/images/cardlist/card/OP07-022.png"
+ },
+ "ST32-001": {
+  "id": "ST32-001",
+  "no": "ST32-001",
+  "rarity": "C",
+  "type": "CHARACTER",
+  "name": "錦えもん",
+  "color": "緑",
+  "cost": "1",
+  "counter": "1000",
+  "img": "https://www.onepiece-cardgame.com/images/cardlist/card/ST32-001.png"
+ },
+ "OP06-033": {
+  "id": "OP06-033",
+  "no": "OP06-033",
+  "rarity": "R",
+  "type": "CHARACTER",
+  "name": "バンダー・デッケン九世",
+  "color": "緑",
+  "cost": "2",
+  "counter": "1000",
+  "img": "https://www.onepiece-cardgame.com/images/cardlist/card/OP06-033.png"
+ },
+ "OP12-023": {
+  "id": "OP12-023",
+  "no": "OP12-023",
+  "rarity": "UC",
+  "type": "CHARACTER",
+  "name": "河松",
+  "color": "緑",
+  "cost": "5",
+  "counter": "2000",
+  "img": "https://www.onepiece-cardgame.com/images/cardlist/card/OP12-023.png"
+ },
+ "ST32-002": {
+  "id": "ST32-002",
+  "no": "ST32-002",
+  "rarity": "SR",
+  "type": "CHARACTER",
+  "name": "光月おでん",
+  "color": "緑",
+  "cost": "5",
+  "counter": "1000",
+  "img": "https://www.onepiece-cardgame.com/images/cardlist/card/ST32-002.png"
+ },
+ "OP13-031": {
+  "id": "OP13-031",
+  "no": "OP13-031",
+  "rarity": "R",
+  "type": "CHARACTER",
+  "name": "トラファルガー・ロー",
+  "color": "緑",
+  "cost": "6",
+  "counter": "-",
+  "img": "https://www.onepiece-cardgame.com/images/cardlist/card/OP13-031.png"
+ },
+ "ST32-003": {
+  "id": "ST32-003",
+  "no": "ST32-003",
+  "rarity": "SR",
+  "type": "CHARACTER",
+  "name": "ジュラキュール・ミホーク",
+  "color": "緑",
+  "cost": "6",
+  "counter": "-",
+  "img": "https://www.onepiece-cardgame.com/images/cardlist/card/ST32-003.png"
+ },
+ "ST24-004": {
+  "id": "ST24-004",
+  "no": "ST24-004",
+  "rarity": "SR",
+  "type": "CHARACTER",
+  "name": "ロー＆ベポ",
+  "color": "緑",
+  "cost": "10",
+  "counter": "-",
+  "img": "https://www.onepiece-cardgame.com/images/cardlist/card/ST24-004.png"
+ },
+ "OP17-022": {
+  "id": "OP17-022",
+  "no": "OP17-022",
+  "rarity": "SR",
+  "type": "CHARACTER",
+  "name": "シャンクス",
+  "color": "緑",
+  "cost": "10",
+  "counter": "-",
+  "img": "https://www.onepiece-cardgame.com/images/cardlist/card/OP17-022.png"
+ },
+ "OP01-055": {
+  "id": "OP01-055",
+  "no": "OP01-055",
+  "rarity": "C",
+  "type": "EVENT",
+  "name": "おれの”侍”になれ‼!",
+  "color": "緑",
+  "cost": "1",
+  "counter": "-",
+  "img": "https://www.onepiece-cardgame.com/images/cardlist/card/OP01-055.png"
+ },
+ "OP06-038": {
+  "id": "OP06-038",
+  "no": "OP06-038",
+  "rarity": "UC",
+  "type": "EVENT",
+  "name": "一大・三千・大千・世界",
+  "color": "緑",
+  "cost": "1",
+  "counter": "-",
+  "img": "https://www.onepiece-cardgame.com/images/cardlist/card/OP06-038.png"
+ },
+ "OP12-037": {
+  "id": "OP12-037",
+  "no": "OP12-037",
+  "rarity": "R",
+  "type": "EVENT",
+  "name": "鬼気 九刀流 阿修羅 抜剣 亡者戯",
+  "color": "緑",
+  "cost": "1",
+  "counter": "-",
+  "img": "https://www.onepiece-cardgame.com/images/cardlist/card/OP12-037.png"
+ },
+ "OP08-036": {
+  "id": "OP08-036",
+  "no": "OP08-036",
+  "rarity": "R",
+  "type": "EVENT",
+  "name": "エレクトリカルルナ",
+  "color": "緑",
+  "cost": "3",
+  "counter": "-",
+  "img": "https://www.onepiece-cardgame.com/images/cardlist/card/OP08-036.png"
+ },
+ "OP14-039": {
+  "id": "OP14-039",
+  "no": "OP14-039",
+  "rarity": "UC",
+  "type": "STAGE",
+  "name": "棺船",
+  "color": "緑",
+  "cost": "1",
+  "counter": "-",
+  "img": "https://www.onepiece-cardgame.com/images/cardlist/card/OP14-039.png"
+ }
+}

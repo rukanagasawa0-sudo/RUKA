@@ -13,7 +13,7 @@ def fetch(url):
 
 def series(sid):
     os.makedirs(CACHE, exist_ok=True)
-    p = os.path.join(CACHE, f"{sid}.json")
+    p = os.path.join(CACHE, f"{sid}_v2.json")
     if os.path.exists(p):
         return json.load(open(p))
     h = fetch(f"{BASE}/cardlist/?search=true&series={sid}").decode()
@@ -24,9 +24,12 @@ def series(sid):
         name = re.search(r'<div class="cardName">([^<]*)</div>', body)
         img = re.search(r'data-src="\.\./(images/cardlist/card/[^"?]+)', body)
         color = re.search(r'<h3>色</h3>([^<]*)<', body)
+        cost = re.search(r'<div class="cost"><h3>[^<]*</h3>([^<]*)<', body)
+        counter = re.search(r'<div class="counter"><h3>[^<]*</h3>([^<]*)<', body)
         out.append(dict(id=cid, no=info.group(1) if info else "", rarity=info.group(2) if info else "",
                         type=info.group(3) if info else "", name=name.group(1) if name else "",
                         color=color.group(1) if color else "",
+                        cost=cost.group(1).strip() if cost else "", counter=counter.group(1).strip() if counter else "",
                         img=f"{BASE}/{img.group(1)}" if img else ""))
     json.dump(out, open(p, "w"), ensure_ascii=False, indent=0)
     return out

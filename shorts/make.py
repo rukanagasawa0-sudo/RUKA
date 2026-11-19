@@ -20,6 +20,7 @@ SCRIPTS = {
     "d3": "scripts.decks_single:gunshikyu",
     "d4": "scripts.decks_single:carue",
     "d5": "scripts.decks_single:luffy",
+    "d6": "scripts.decks_single:mihawk",
 }
 
 

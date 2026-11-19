@@ -6,6 +6,7 @@
 from config import CTA_RESERVE, SHOP_NAME
 from engine.render import W, Short, ease_back, ease_in_out, img_sprite, lerp, text_sprite
 from engine.widgets import burst, cta_panel, pop_in
+from engine.widgets import stamp as stamp_fn
 from scripts.v6_op18_decks import AREA, FULL, view
 
 CARDS = (540, 520, 1.1)
@@ -30,7 +31,8 @@ def intro_scene(leader_id, label, color):
     return draw
 
 
-def deck_body(name, label, color, focuses, callouts):
+def deck_body(name, label, color, focuses, callouts, stamp=None):
+    """stamp=(セリフ番号, 文字)：そのセリフ以降、デッキ画像の上に大きなスタンプを押す。"""
     def draw(c, f):
         t, li = f["t"], max(0, f["li"])
         cur = focuses[li] or FULL
@@ -41,6 +43,9 @@ def deck_body(name, label, color, focuses, callouts):
         c.rrect((AREA[0] + 20, AREA[1] + 18, AREA[0] + 20 + 80 + len(label) * 46, AREA[1] + 96), 39,
                 fill=color + (240,), outline=(255, 255, 255), width=4)
         c.text(label, AREA[0] + 50, AREA[1] + 57, 44, anchor="lm", fnt="noto", fill=(255, 255, 255), align="left")
+        if stamp and f["li"] >= stamp[0]:
+            st = t - (f["scene"].lines[stamp[0]].start - f["scene"].start)
+            stamp_fn(c, stamp[1], W / 2, (AREA[1] + AREA[3]) / 2 - 60, st, 0.1, size=200, rot=-12)
         co = callouts[li] if f["li"] >= 0 and li < len(callouts) else None
         if co:
             spr = text_sprite(co, 64, "noto", fill=(30, 30, 30), hl=color)
@@ -58,14 +63,16 @@ def outro(color):
     return draw
 
 
-def build(slug, name, leader_id, label, color, intro_line, body_lines, focuses, callouts, bg):
-    s = Short(slug, f"神の支配 新リーダー\n*{label}*デッキ", bg, bgm="pop", accent=tuple(min(255, v + 90) for v in color),
+def build(slug, name, leader_id, label, color, intro_line, body_lines, focuses, callouts, bg, stamp=None,
+          outro_line=None, title=None):
+    s = Short(slug, title or f"神の支配 新リーダー\n*{label}*デッキ", bg, bgm="pop", accent=tuple(min(255, v + 90) for v in color),
               names={"ずんだもん": "司会"})
     s.scene(intro_scene(leader_id, label, color), ("zunda",) + intro_line + ("whoosh",))
-    s.scene(deck_body(name, label, color, focuses, callouts), *[("zunda",) + ln for ln in body_lines])
+    s.scene(deck_body(name, label, color, focuses, callouts, stamp),
+            *[ln if ln[0] in ("zunda", "zunda_namida", "zunda_ama") else ("zunda",) + ln for ln in body_lines])
     s.scene(outro(tuple(min(255, v + 90) for v in color)),
-            ("zunda", "このデッキ、使ってみたいのだ？*コメント*で教えてほしいのだ！",
-             "このデッキ、使ってみたいのだ？コメントで教えてほしいのだ！", "ding", 0.1, 0.7))
+            ("zunda",) + (outro_line or ("このデッキ、使ってみたいのだ？*コメント*で教えてほしいのだ！",
+                                         "このデッキ、使ってみたいのだ？コメントで教えてほしいのだ！")) + ("ding", 0.1, 0.7))
     return s
 
 
@@ -134,3 +141,27 @@ def luffy():
         [None, (468, 440, 1.25), card(816, 634)],
         ["平均コスト *2.5*", "*ウォーターセブン*の仲間", "イベント *×14*"],
         ((10, 35, 20), (30, 120, 70)))
+
+
+def mihawk():
+    """禁止前の緑ミホーク（メルカード 2026/9 版の標準構成を公式画像で組んだデッキ画像）。"""
+    return build(
+        "d6_mihawk", "mihawk", "OP14-020", "ミホーク", (40, 150, 90),
+        ("禁止になった最強デッキ、緑の*ミホーク*デッキを紹介するのだ！",
+         "禁止になった最強デッキ、緑の、ミホークデッキを紹介するのだ！"),
+        [("1コストが*24枚*！*ペローナ*と*お玉*で、序盤からサーチするのだ。",
+          "1コストが、24枚！ペローナと、お玉で、序盤からサーチするのだ。", "pop"),
+         ("中盤は*ロー*と*ミホーク*で、どんどん追加展開！", "中盤は、ローと、ミホークで、どんどん追加展開！", "pop"),
+         ("最後は*シャンクス*で全員レストにして、一気に殴り切るのだ！", "最後は、シャンクスで、全員レストにして、一気に殴り切るのだ！",
+          "kira"),
+         ("zunda_namida", "でも*10月12日*から*禁止*……今は大会で使えないのだ……", "でも、10月12日から禁止。今は大会で使えないのだ。",
+          "impact"),
+         ("新しいテキストの*プロモ版*が、大会やイベントで配られる予定なのだ！", "新しいテキストの、プロモ版が、大会やイベントで配られる予定なのだ！",
+          "ding")],
+        [card(232, 364, 1.7), card(908, 364, 1.7), card(170, 536, 1.9), None, None],
+        ["1コスト *×24*", "*追加展開*", "切り札 *シャンクス*", "*10/12〜 禁止*", "*救済プロモ* 配布予定"],
+        ((8, 30, 20), (30, 110, 60)),
+        stamp=(3, "禁止"),
+        title="禁止された最強デッキ\n*緑ミホーク*",
+        outro_line=("ミホーク、また使いたいのだ？*コメント*で教えてほしいのだ！",
+                    "ミホーク、また使いたいのだ？コメントで教えてほしいのだ！"))
