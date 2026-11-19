@@ -14,6 +14,7 @@ SCRIPTS = {
     "v2": "scripts.v2_op18_summary",
     "v3": "scripts.v3_price_quiz",
     "v5": "scripts.v5_release_calendar",
+    "v6": "scripts.v6_op18_decks",
 }
 
 
