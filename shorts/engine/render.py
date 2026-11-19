@@ -657,8 +657,13 @@ class Short:
         c.d.rectangle((0, 70, W, 80), fill=self.accent + (255,))
         c.d.rectangle((0, 320, W, 330), fill=self.accent + (255,))
         pulse = 1 + 0.015 * math.sin(T * 6)
-        c.text(self.title, W / 2, 200, 84, scale=pulse, fnt="dela", fill=(255, 255, 255),
-               stroke=8, stroke_fill=(0, 0, 0), hl=self.accent, max_w=1000, spacing=1.15)
+        if not hasattr(self, "_title_size"):   # 長いタイトルは折り返さず文字を縮める
+            size = 84
+            while size > 52 and text_sprite(self.title, size, "dela", stroke=8, spacing=1.15).width > 1010:
+                size -= 4
+            self._title_size = size
+        c.text(self.title, W / 2, 200, self._title_size, scale=pulse, fnt="dela", fill=(255, 255, 255),
+               stroke=8, stroke_fill=(0, 0, 0), hl=self.accent, spacing=1.15)
 
     def draw_sub(self, c, ln, T):
         ch = CHARS[ln.spk]

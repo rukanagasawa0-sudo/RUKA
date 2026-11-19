@@ -12,7 +12,8 @@ Y0, Y1, X0, X1 = 1205, 1550, 30, 1050   # 字幕ボックス＋名札の範囲
 keys = sys.argv[1:] or list(SCRIPTS)
 bad_total = 0
 for k in keys:
-    s = importlib.import_module(SCRIPTS[k]).make().build()
+    modname, _, func = SCRIPTS[k].partition(":")
+    s = getattr(importlib.import_module(modname), func or "make")().build()
     hits = []
     T = 0.0
     while T < s.duration:

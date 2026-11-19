@@ -15,6 +15,11 @@ SCRIPTS = {
     "v3": "scripts.v3_price_quiz",
     "v5": "scripts.v5_release_calendar",
     "v6": "scripts.v6_op18_decks",
+    "d1": "scripts.decks_single:allsunday",
+    "d2": "scripts.decks_single:spandam",
+    "d3": "scripts.decks_single:gunshikyu",
+    "d4": "scripts.decks_single:carue",
+    "d5": "scripts.decks_single:luffy",
 }
 
 
@@ -22,8 +27,8 @@ def main(argv):
     preview = "--preview" in argv
     keys = [a for a in argv if not a.startswith("--")] or list(SCRIPTS)
     for k in keys:
-        mod = importlib.import_module(SCRIPTS[k])
-        s = mod.make()
+        modname, _, func = SCRIPTS[k].partition(":")
+        s = getattr(importlib.import_module(modname), func or "make")()
         t0 = time.time()
         if preview:
             s.build()
